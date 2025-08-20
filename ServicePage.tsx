@@ -82,14 +82,16 @@ const ServicePage: React.FC = () => {
                             <h3 className="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Direct Booking Available</h3>
                             <button 
                                 onClick={() => navigate(`/booking/${service.id}`)}
-                                className="mt-3 w-full px-8 py-4 text-lg font-bold text-white bg-cyan-500 rounded-xl shadow-lg hover:shadow-cyan-500/40 hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-300 transition-all duration-300 ease-in-out transform hover:-translate-y-1 flex items-center justify-center gap-2"
+                                className="mt-3 w-full px-8 py-3 text-white bg-cyan-500 rounded-xl shadow-lg hover:shadow-cyan-500/40 hover:bg-cyan-600 focus:outline-none focus:ring-4 focus:ring-cyan-300 transition-all duration-300 ease-in-out transform hover:-translate-y-1 flex flex-col items-center justify-center"
                             >
-                                Book Now
                                 {service.price != null && (
-                                    <span className="bg-cyan-700/80 text-white text-sm font-bold px-3 py-1 rounded-full">
+                                    <span className="text-2xl font-extrabold tracking-tight leading-none">
                                         {service.price === 0 ? 'FREE' : `₹${service.price}`}
                                     </span>
                                 )}
+                                <span className="text-base font-bold mt-1">
+                                    Book Now
+                                </span>
                             </button>
                         </div>
                     )}

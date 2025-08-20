@@ -1,6 +1,7 @@
 
 
-import React, { useContext, useMemo } from 'react';
+
+import React, { useContext, useMemo, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { getBreadcrumbs, findServiceById } from './serviceHelper';
 import Breadcrumb from './components/Breadcrumb';
@@ -10,10 +11,141 @@ import { ServiceContext } from './context/ServiceContext';
 
 const { useParams, useNavigate, Link } = ReactRouterDOM as any;
 
+const colorClasses = [
+    { bg: 'bg-cyan-100 dark:bg-cyan-900/30', text: 'text-cyan-600 dark:text-cyan-400' },
+    { bg: 'bg-blue-100 dark:bg-blue-900/30', text: 'text-blue-600 dark:text-blue-400' },
+    { bg: 'bg-purple-100 dark:bg-purple-900/30', text: 'text-purple-600 dark:text-purple-400' },
+    { bg: 'bg-emerald-100 dark:bg-emerald-900/30', text: 'text-emerald-600 dark:text-emerald-400' },
+    { bg: 'bg-amber-100 dark:bg-amber-900/30', text: 'text-amber-600 dark:text-amber-400' },
+    { bg: 'bg-red-100 dark:bg-red-900/30', text: 'text-red-600 dark:text-red-400' },
+    { bg: 'bg-indigo-100 dark:bg-indigo-900/30', text: 'text-indigo-600 dark:text-indigo-400' },
+    { bg: 'bg-pink-100 dark:bg-pink-900/30', text: 'text-pink-600 dark:text-pink-400' },
+];
+
+const SubServiceCard = ({ service, onClick }: { service: Service; onClick: () => void }) => {
+    const hashCode = (num: number) => {
+        let hash = 0;
+        const str = String(num);
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return hash;
+    };
+    const { bg, text } = colorClasses[Math.abs(hashCode(service.id)) % colorClasses.length];
+
+    return (
+        <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-lg overflow-hidden border border-slate-200/50 dark:border-slate-700/50 flex flex-col group transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5">
+            {/* Image/Icon Area */}
+            <div className="relative h-40 flex items-center justify-center overflow-hidden">
+                 <div className={`absolute inset-0 ${bg} transition-transform duration-500 ease-in-out group-hover:scale-110`}></div>
+                 <div className={`relative ${text} transition-transform duration-500 ease-in-out group-hover:scale-110`}>
+                    <IconMap iconName={service.icon_name} className="h-16 w-16" />
+                </div>
+            </div>
+
+            {/* Content Area */}
+            <div className="p-5 flex flex-col flex-grow">
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 leading-tight mb-1 truncate">
+                    {service.name}
+                </h3>
+                
+                {service.description && (
+                    <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 h-8 overflow-hidden">
+                        {service.description}
+                    </p>
+                )}
+                
+                <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mt-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">4.5</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">(24 Reviews)</span>
+                </div>
+
+                {/* This div pushes the content below it to the bottom */}
+                <div className="flex-grow"></div>
+
+                <div className="flex justify-between items-center mt-5 pt-4 border-t border-slate-100 dark:border-slate-700/50">
+                    {service.is_bookable && service.price != null ? (
+                         <div className="text-xl font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+                            {service.price === 0 ? 'FREE' : `₹${service.price}`}
+                        </div>
+                    ) : (
+                        <div className="text-sm font-semibold text-slate-400 dark:text-slate-500">View Options</div>
+                    )}
+                    <button onClick={onClick} className="px-5 py-2.5 bg-cyan-500 text-white text-sm font-bold rounded-lg shadow-md shadow-cyan-500/20 hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 transform group-hover:scale-105">
+                        {service.is_bookable ? 'Book Now' : 'View Details'}
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const SubServiceListItem = ({ service, onClick }: { service: Service; onClick: () => void }) => {
+    const hashCode = (num: number) => {
+        let hash = 0;
+        const str = String(num);
+        for (let i = 0; i < str.length; i++) {
+            hash = str.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        return hash;
+    };
+    const { bg, text } = colorClasses[Math.abs(hashCode(service.id)) % colorClasses.length];
+    
+    return (
+        <div 
+            onClick={onClick}
+            className="bg-white dark:bg-slate-800 rounded-xl shadow-md overflow-hidden border border-slate-200/50 dark:border-slate-700/50 flex items-center p-4 group transition-all duration-300 hover:shadow-xl hover:border-cyan-400 dark:hover:border-cyan-600 cursor-pointer animate-list-item-in"
+        >
+            {/* Icon */}
+            <div className={`flex-shrink-0 flex items-center justify-center w-16 h-16 rounded-lg ${bg} transition-transform duration-300 group-hover:scale-105`}>
+                <div className={text}>
+                    <IconMap iconName={service.icon_name} className="h-8 w-8" />
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-grow px-4 min-w-0">
+                <h3 className="text-base font-bold text-slate-800 dark:text-slate-100 truncate">
+                    {service.name}
+                </h3>
+                <div className="flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 mt-1">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-amber-500" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                    </svg>
+                    <span className="font-bold text-slate-700 dark:text-slate-200">4.5</span>
+                    <span className="text-xs text-slate-500 dark:text-slate-400">(24 Reviews)</span>
+                </div>
+            </div>
+
+            {/* Actions */}
+            <div className="flex-shrink-0 flex items-center gap-4">
+                 {service.is_bookable && service.price != null ? (
+                     <div className="text-lg font-extrabold text-slate-800 dark:text-slate-100 tracking-tight">
+                        {service.price === 0 ? 'FREE' : `₹${service.price}`}
+                    </div>
+                ) : (
+                    <div className="text-sm font-semibold text-slate-400 dark:text-slate-500">View Options</div>
+                )}
+                <button onClick={onClick} className="hidden sm:inline-block px-5 py-2.5 bg-cyan-500 text-white text-sm font-bold rounded-lg shadow-md shadow-cyan-500/20 hover:bg-cyan-600 hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300">
+                    {service.is_bookable ? 'Book Now' : 'View Details'}
+                </button>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400 group-hover:text-cyan-600 transition-colors" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                </svg>
+            </div>
+        </div>
+    );
+};
+
+
 const ServicePage: React.FC = () => {
   const params = useParams();
   const navigate = useNavigate();
   const { allServices, loading } = useContext(ServiceContext);
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
   
   const serviceId = Number(params.serviceId);
 
@@ -103,51 +235,49 @@ const ServicePage: React.FC = () => {
         <div className="lg:col-span-8 xl:col-span-9">
             {hasSubServices ? (
                 <>
-                    <h2 className="text-3xl font-bold text-slate-700 dark:text-slate-300 mb-6 tracking-tight">
-                        {service.is_bookable ? 'Or, Choose a Specific Service' : `Services under ${service.name}`}
-                    </h2>
-                    <div className="flex flex-col gap-5">
-                        {service.subServices?.map((sub, index) => (
-                            <div
-                                key={sub.id}
-                                onClick={() => handleSubServiceClick(sub)}
-                                style={{ animationDelay: `${100 * index}ms`, opacity: 0 }}
-                                className="group bg-white dark:bg-slate-800 p-5 rounded-2xl shadow-lg border border-transparent hover:border-cyan-400 dark:hover:border-cyan-500 cursor-pointer transform hover:scale-[1.02] transition-all duration-300 ease-in-out flex items-center gap-5 animate-list-item-in"
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-3xl font-bold text-slate-700 dark:text-slate-300 tracking-tight">
+                            {service.is_bookable ? 'Or, Choose a Specific Service' : `Services under ${service.name}`}
+                        </h2>
+                         <div className="hidden md:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg gap-1">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                aria-label="Grid View"
+                                className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-white/50 dark:hover:bg-slate-700/50'}`}
                             >
-                                <div className="flex-shrink-0 text-cyan-500 bg-cyan-100 dark:bg-cyan-900/50 p-4 rounded-2xl group-hover:scale-110 transition-transform duration-300">
-                                    <IconMap iconName={sub.icon_name} className="h-10 w-10" />
-                                </div>
-                                <div className="flex-1 min-w-0">
-                                    <h3 className="text-xl font-bold text-slate-800 dark:text-slate-100 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">{sub.name}</h3>
-                                    <p className="text-slate-500 dark:text-slate-400 text-sm mt-1 truncate">{sub.description || 'Proceed to the next step.'}</p>
-                                </div>
-                                
-                                <div className="flex-shrink-0 ml-auto flex items-center gap-6">
-                                    {sub.is_bookable && sub.price != null && (
-                                        <div className="text-right">
-                                            <div className="text-2xl font-extrabold text-cyan-500 dark:text-cyan-400">
-                                                {sub.price === 0 ? 'FREE' : `₹${sub.price}`}
-                                            </div>
-                                        </div>
-                                    )}
-                                    
-                                    {sub.is_bookable ? (
-                                        <div className="text-white bg-cyan-500 group-hover:bg-cyan-600 rounded-full p-3 transition-all shadow-lg group-hover:scale-110 transform">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-                                              <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                                            </svg>
-                                        </div>
-                                    ) : (
-                                        <div className="text-cyan-500/50 dark:text-cyan-400/50 transition-all group-hover:text-cyan-500 group-hover:dark:text-cyan-400 group-hover:translate-x-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" viewBox="0 0 20 20" fill="currentColor">
-                                                <path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
-                                            </svg>
-                                        </div>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
+                                 <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${viewMode === 'grid' ? 'text-cyan-500' : 'text-slate-400'}`} viewBox="0 0 20 20" fill="currentColor"><path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" /></svg>
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                aria-label="List View"
+                                className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-white dark:bg-slate-700 shadow-sm' : 'hover:bg-white/50 dark:hover:bg-slate-700/50'}`}
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${viewMode === 'list' ? 'text-cyan-500' : 'text-slate-400'}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" /></svg>
+                            </button>
+                        </div>
                     </div>
+
+                    {viewMode === 'grid' ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
+                            {service.subServices?.map((sub) => (
+                               <SubServiceCard 
+                                    key={sub.id} 
+                                    service={sub} 
+                                    onClick={() => handleSubServiceClick(sub)}
+                               />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            {service.subServices?.map((sub) => (
+                                <SubServiceListItem
+                                    key={sub.id}
+                                    service={sub}
+                                    onClick={() => handleSubServiceClick(sub)}
+                                />
+                            ))}
+                        </div>
+                    )}
                 </>
             ) : (
                 <div className="text-center p-10 lg:p-20 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-700 animate-fade-in">

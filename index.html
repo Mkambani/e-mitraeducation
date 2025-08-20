@@ -31,6 +31,16 @@
                 'accent-light': 'var(--admin-accent-light)',
                 purple: '#845EFF',
                 pink: '#F252E3',
+
+                // V3 Cyan Theme
+                'sidebar-bg': 'var(--admin-sidebar-bg)',
+                'sidebar-text': 'var(--admin-sidebar-text)',
+                'sidebar-heading': 'var(--admin-sidebar-heading)',
+                'sidebar-active-bg': 'var(--admin-sidebar-active-bg)',
+                'sidebar-icon': 'var(--admin-sidebar-icon)',
+                'main-bg': 'var(--admin-main-bg)',
+                'card-bg': 'var(--admin-card-bg)',
+                'card-border': 'var(--admin-card-border)',
               }
             },
             keyframes: {
@@ -58,19 +68,9 @@
                 '0%, 100%': { 'background-color': 'rgba(30, 41, 59, 1)' }, /* slate-800 */
                 '50%': { 'background-color': 'rgba(51, 65, 85, 1)' }, /* slate-700 */
               },
-              // Admin UI animations v2: "Liquid Glass"
-              'gradient-mesh': {
-                '0%': { backgroundPosition: '0% 50%' },
-                '50%': { backgroundPosition: '100% 50%' },
-                '100%': { backgroundPosition: '0% 50%' },
-              },
               'content-in': {
                 '0%': { opacity: '0', transform: 'translateY(20px)' },
                 '100%': { opacity: '1', transform: 'translateY(0)' },
-              },
-              'mercury-flow': {
-                 '0%': { 'stroke-dashoffset': '1000' },
-                 '100%': { 'stroke-dashoffset': '0' },
               },
             },
             animation: {
@@ -80,9 +80,7 @@
               'list-item-in': 'list-item-in 0.3s ease-out forwards',
               'pulse-bg': 'pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
               'dark-pulse-bg': 'dark-pulse-bg 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-              'gradient-mesh': 'gradient-mesh 15s ease infinite',
               'content-in': 'content-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards',
-              'mercury-flow': 'mercury-flow 2s ease-in-out forwards',
             },
           }
         }
@@ -90,24 +88,40 @@
     </script>
     <style>
       :root {
-        --admin-bg: #F0F2F8;
-        --admin-surface: #FFFFFF;
-        --admin-surface-glass: rgba(255, 255, 255, 0.6);
-        --admin-border: rgba(0, 0, 0, 0.1);
-        --admin-light: #5A647F;
-        --admin-heading: #1B2541;
-        --admin-accent: #5E56F2;
-        --admin-accent-light: #E9E7FF;
+        --admin-accent: #06b6d4; /* cyan-500 */
+        --admin-accent-light: #cffafe; /* cyan-100 */
+        --admin-light: #475569; /* slate-600 */
+        --admin-heading: #0f172a; /* slate-900 */
+        --admin-purple: '#845EFF';
+        --admin-pink: '#F252E3';
+
+        /* New V3 Admin Theme (Cyan) */
+        --admin-sidebar-bg: #083344; /* cyan-950 */
+        --admin-sidebar-text: #a5f3fc; /* cyan-200 */
+        --admin-sidebar-heading: #ecfeff; /* cyan-50 */
+        --admin-sidebar-active-bg: #155e75; /* cyan-800 */
+        --admin-sidebar-icon: #22d3ee; /* cyan-400 */
+        --admin-main-bg: #f8fafc; /* slate-50 */
+        --admin-card-bg: #ffffff;
+        --admin-card-border: #e2e8f0; /* slate-200 */
       }
       .dark {
-        --admin-bg: #090B16;
-        --admin-surface: #121528;
-        --admin-surface-glass: rgba(18, 21, 40, 0.6);
-        --admin-border: rgba(255, 255, 255, 0.1);
-        --admin-light: #A0B2D8;
-        --admin-heading: #E0E8FF;
-        --admin-accent: #7870FF;
-        --admin-accent-light: rgba(120, 112, 255, 0.15);
+        --admin-accent: #22d3ee; /* cyan-400 */
+        --admin-accent-light: #1e293b; /* slate-800 */
+        --admin-light: #94a3b8; /* slate-400 */
+        --admin-heading: #f1f5f9; /* slate-100 */
+        --admin-purple: '#a78bfa';
+        --admin-pink: '#f472b6';
+        
+        /* New V3 Admin Theme (Cyan - Dark) */
+        --admin-sidebar-bg: #0f172a; /* slate-900 */
+        --admin-sidebar-text: #94a3b8; /* slate-400 */
+        --admin-sidebar-heading: #f1f5f9; /* slate-100 */
+        --admin-sidebar-active-bg: #1e293b; /* slate-800 */
+        --admin-sidebar-icon: #22d3ee; /* cyan-400 */
+        --admin-main-bg: #020617; /* slate-950 */
+        --admin-card-bg: #0f172a; /* slate-900 */
+        --admin-card-border: #334155; /* slate-700 */
       }
     </style>
     <script>

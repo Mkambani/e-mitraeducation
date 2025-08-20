@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useCallback } from 'react';
 import { supabase } from '../../supabaseClient';
 import { PaymentGateway } from '../../types';
@@ -79,21 +78,21 @@ const AdminPaymentGatewaysPage: React.FC = () => {
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-extrabold text-admin-heading tracking-tight">Payment Gateways</h1>
+        <div className="bg-admin-card-bg p-6 rounded-xl shadow-sm border border-admin-card-border">
+            <div className="mb-6 pb-6 border-b border-admin-card-border">
+                <h2 className="text-xl font-bold text-admin-heading">Payment Gateways</h2>
                 <p className="text-admin-light/80 mt-1">
                     Enable, disable, and configure the payment methods available to users.
                 </p>
             </div>
-
-            <div className="bg-admin-surface-glass border border-admin-border backdrop-blur-2xl p-6 rounded-2xl shadow-xl shadow-black/10 space-y-6">
+            
+            <div className="space-y-6">
                 {loading && <p className="text-admin-light">Loading gateways...</p>}
                 {error && <p className="text-red-400 bg-red-500/10 p-3 rounded-md">{error}</p>}
                 
                 <div className="space-y-8">
                     {gateways.map(gw => (
-                        <div key={gw.id} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start border-t border-admin-border pt-6 first:border-t-0 first:pt-0">
+                        <div key={gw.id} className="grid grid-cols-1 md:grid-cols-3 gap-6 items-start border-t border-admin-card-border pt-6 first:border-t-0 first:pt-0">
                             {/* Left: General Info */}
                             <div className="md:col-span-1 space-y-3">
                                 <div className="flex items-center gap-3">
@@ -102,7 +101,7 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                                         type="text" 
                                         value={gw.name}
                                         onChange={(e) => handleFieldChange(gw.id, 'name', e.target.value)}
-                                        className="text-lg font-bold text-admin-heading bg-transparent border-b border-dashed border-admin-border focus:outline-none focus:border-solid focus:border-admin-accent w-full"
+                                        className="text-lg font-bold text-admin-heading bg-transparent border-b border-dashed border-admin-card-border focus:outline-none focus:border-solid focus:border-admin-accent w-full"
                                     />
                                 </div>
                                 <div className="flex items-center gap-4">
@@ -121,7 +120,7 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                                             type="number" 
                                             value={gw.display_order} 
                                             onChange={e => handleFieldChange(gw.id, 'display_order', Number(e.target.value))}
-                                            className="w-16 p-1 rounded bg-admin-surface text-admin-heading text-center"
+                                            className="w-16 p-1 rounded bg-admin-main-bg text-admin-heading text-center"
                                         />
                                     </div>
                                 </div>
@@ -136,7 +135,7 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                                             placeholder="rzp_live_..."
                                             value={gw.config?.key_id || ''}
                                             onChange={e => handleConfigChange(gw.id, 'key_id', e.target.value)}
-                                            className="w-full p-2 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
+                                            className="w-full p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
                                         />
                                     </div>
                                 )}
@@ -147,7 +146,7 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                                         placeholder="Displayed to user on payment screen"
                                         value={gw.config?.description || ''}
                                         onChange={e => handleConfigChange(gw.id, 'description', e.target.value)}
-                                        className="w-full p-2 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
+                                        className="w-full p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
                                     />
                                 </div>
                             </div>
@@ -155,12 +154,12 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                     ))}
                 </div>
 
-                 <div className="flex items-center justify-end gap-4 border-t border-admin-border pt-6">
+                 <div className="flex items-center justify-end gap-4 border-t border-admin-card-border pt-6">
                     {success && <p className="text-sm font-medium text-green-400 flex-1">{success}</p>}
                     <button
                         onClick={handleSave}
                         disabled={saving}
-                        className="px-8 py-3 text-base font-bold text-white bg-admin-accent rounded-xl shadow-lg hover:brightness-110 disabled:bg-slate-400 focus:outline-none focus:ring-4 focus:ring-admin-accent/50 transition-all"
+                        className="px-6 py-2.5 text-sm font-bold text-white bg-admin-accent rounded-lg shadow-sm hover:bg-admin-accent/90 disabled:bg-slate-400 transition-all"
                     >
                         {saving ? 'Saving...' : 'Save All Settings'}
                     </button>

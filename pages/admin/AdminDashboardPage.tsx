@@ -1,190 +1,93 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Booking } from '../../types';
 import * as ReactRouterDOM from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 
 const { Link } = ReactRouterDOM as any;
 
-const StatCard: React.FC<{ title: string; value: number | null; loading: boolean, icon: React.ReactNode, delay: number, color: string }> = ({ title, value, loading, icon, delay, color }) => (
-    <div 
-      className="bg-admin-surface-glass border border-admin-border backdrop-blur-2xl p-6 rounded-2xl shadow-xl shadow-black/10 flex items-center gap-5 animate-list-item-in group"
-      style={{ animationDelay: `${delay}ms`}}
-    >
-        <div className={`flex-shrink-0 w-16 h-16 rounded-2xl bg-admin-accent-light text-admin-accent flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-admin-accent/20`}>
+const StatCard: React.FC<{ title: string; value: number | string; icon: React.ReactNode; color: string; }> = ({ title, value, icon, color }) => (
+    <div className="bg-admin-card-bg p-5 rounded-xl shadow-sm border border-admin-card-border flex items-center gap-4">
+        <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${color}`}>
             {icon}
         </div>
         <div>
-            <h3 className="text-base font-semibold text-admin-light uppercase tracking-wider font-mono">{title}</h3>
-            {loading ? (
-                <div className="h-10 w-24 bg-admin-light/10 animate-pulse rounded-md mt-2"></div>
-            ) : (
-                <p className="text-4xl font-extrabold text-admin-heading mt-1">{value ?? 'N/A'}</p>
-            )}
+            <p className="text-sm text-admin-light font-medium">{title}</p>
+            <p className="text-2xl font-bold text-admin-heading">{value}</p>
         </div>
     </div>
 );
 
+const LineChartPlaceholder: React.FC = () => (
+    <svg className="w-full h-64" viewBox="0 0 400 150" preserveAspectRatio="none">
+      <defs>
+        <linearGradient id="line-chart-gradient" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stopColor="#22c55e" stopOpacity="0.2"/>
+          <stop offset="100%" stopColor="#22c55e" stopOpacity="0"/>
+        </linearGradient>
+      </defs>
+      {/* Grid lines */}
+      <line x1="0" y1="0" x2="0" y2="150" stroke="#E5E7EB" strokeWidth="0.5" className="dark:stroke-gray-700"/>
+      <line x1="0" y1="130" x2="400" y2="130" stroke="#E5E7EB" strokeWidth="0.5" className="dark:stroke-gray-700"/>
+      <line x1="0" y1="80" x2="400" y2="80" stroke="#E5E7EB" strokeWidth="0.5" className="dark:stroke-gray-700"/>
+      <line x1="0" y1="30" x2="400" y2="30" stroke="#E5E7EB" strokeWidth="0.5" className="dark:stroke-gray-700"/>
+      {/* Chart Path */}
+      <path d="M 0 100 Q 50 80, 100 90 T 200 100 T 300 60 T 400 70" stroke="#22c55e" fill="none" strokeWidth="2.5" strokeLinecap="round"/>
+      <path d="M 0 100 Q 50 80, 100 90 T 200 100 T 300 60 T 400 70 L 400 150 L 0 150 Z" fill="url(#line-chart-gradient)"/>
+    </svg>
+);
 
-const BOOKING_STATUSES = ['Pending', 'Awaiting Payment', 'In Review', 'Requires Action', 'Approved', 'Rejected', 'Completed'];
-const STATUS_COLORS: { [key: string]: string } = {
-  'Pending': 'bg-yellow-400',
-  'Awaiting Payment': 'bg-sky-400',
-  'In Review': 'bg-blue-400',
-  'Requires Action': 'bg-orange-400',
-  'Approved': 'bg-green-400',
-  'Rejected': 'bg-red-400',
-  'Completed': 'bg-purple-400',
-};
-
-const STATUS_TEXT_COLORS: { [key: string]: string } = {
-  'Pending': 'text-yellow-400',
-  'Awaiting Payment': 'text-sky-400',
-  'In Review': 'text-blue-400',
-  'Requires Action': 'text-orange-400',
-  'Approved': 'text-green-400',
-  'Rejected': 'text-red-400',
-  'Completed': 'text-purple-400',
-};
-
-
-const StatsChart: React.FC<{ bookings: Pick<Booking, 'status'>[], loading: boolean }> = ({ bookings, loading }) => {
-    const [statusCounts, setStatusCounts] = useState<{[key: string]: number}>({});
-    
-    useEffect(() => {
-        const counts = BOOKING_STATUSES.reduce((acc, status) => ({...acc, [status]: 0}), {});
-        bookings.forEach(b => {
-            if (counts[b.status] !== undefined) {
-                counts[b.status]++;
-            }
-        });
-        setStatusCounts(counts);
-    }, [bookings]);
-
-    const maxCount = Math.max(...Object.values(statusCounts), 1); // Avoid division by zero
+const DonutChartPlaceholder: React.FC<{ values: { color: string; value: number }[] }> = ({ values }) => {
+    const total = values.reduce((sum, item) => sum + item.value, 0);
+    let cumulative = 0;
 
     return (
-       <div className="bg-admin-surface-glass border border-admin-border backdrop-blur-2xl p-6 rounded-2xl shadow-xl shadow-black/10 animate-list-item-in" style={{ animationDelay: '150ms' }}>
-           <h3 className="text-xl font-bold text-admin-heading mb-6">Bookings by Status</h3>
-            {loading ? (
-                <div className="space-y-4">
-                    {Array.from({length: 4}).map((_, i) => <div key={i} className="h-8 bg-admin-light/10 animate-pulse rounded-md"></div>)}
-                </div>
-            ) : (
-                <div className="space-y-4">
-                    {BOOKING_STATUSES.map((status, index) => (
-                        <div key={status} className="flex items-center gap-4 group" style={{ animation: `list-item-in 0.5s ease-out ${index * 50}ms forwards`, opacity: 0 }}>
-                            <div className="w-32 text-sm font-semibold text-admin-light truncate">{status}</div>
-                            <div className="flex-1 bg-admin-light/10 rounded-full h-2.5 overflow-hidden">
-                                <div 
-                                    className={`h-full ${STATUS_COLORS[status] || 'bg-slate-400'} rounded-full transition-all duration-700 ease-out`}
-                                    style={{ width: `${(statusCounts[status] / maxCount) * 100}%`}}
-                                >
-                                </div>
-                            </div>
-                            <div className="w-10 text-right font-bold font-mono text-admin-heading">{statusCounts[status]}</div>
-                        </div>
-                    ))}
-                </div>
-            )}
-       </div>
+        <svg className="w-48 h-48" viewBox="0 0 36 36">
+            <circle cx="18" cy="18" r="15.915" fill="none" className="stroke-current text-gray-200 dark:text-gray-700" strokeWidth="3"></circle>
+            {values.map((item, index) => {
+                const dasharray = (item.value / total) * 100;
+                const dashoffset = 25 - cumulative;
+                cumulative += dasharray;
+                return (
+                    <circle
+                        key={index}
+                        cx="18"
+                        cy="18"
+                        r="15.915"
+                        fill="none"
+                        className={`stroke-current ${item.color}`}
+                        strokeWidth="3.5"
+                        strokeDasharray={`${dasharray} ${100 - dasharray}`}
+                        strokeDashoffset={dashoffset}
+                        transform="rotate(-90 18 18)"
+                    ></circle>
+                );
+            })}
+             <text x="18" y="20" className="fill-current text-admin-heading text-[8px] font-bold" textAnchor="middle">
+                {total}
+            </text>
+        </svg>
     );
 };
-
-interface RecentBooking {
-    id: number;
-    created_at: string;
-    status: string;
-    services: { name: string; } | null;
-    profiles: { full_name: string | null; } | null;
-}
-
-const RecentBookings: React.FC = () => {
-    const [recentBookings, setRecentBookings] = useState<RecentBooking[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchRecent = async () => {
-            setLoading(true);
-            try {
-                const { data, error } = await supabase
-                    .from('bookings')
-                    .select('id, created_at, status, services(name), profiles(full_name)')
-                    .order('created_at', { ascending: false })
-                    .limit(5);
-                if (error) throw error;
-                setRecentBookings((data as unknown as RecentBooking[]) || []);
-            } catch (err) { console.error(err); } 
-            finally { setLoading(false); }
-        };
-        fetchRecent();
-    }, []);
-
-    return (
-        <div className="bg-admin-surface-glass border border-admin-border backdrop-blur-2xl rounded-2xl shadow-xl shadow-black/10 overflow-hidden animate-list-item-in" style={{ animationDelay: '200ms' }}>
-             <h3 className="text-xl font-bold text-admin-heading p-6">Recent Bookings</h3>
-            <div className="overflow-x-auto">
-                 <div className="w-full text-left text-sm">
-                        {loading ? (
-                             Array.from({length: 5}).map((_, i) => (
-                                <div key={i} className="border-t border-admin-border p-4"><div className="h-8 bg-admin-light/10 animate-pulse rounded-md"></div></div>
-                            ))
-                        ) : recentBookings.length === 0 ? (
-                            <div className="p-6 text-center text-admin-light">No bookings yet.</div>
-                        ) : (
-                            recentBookings.map((booking, index) => (
-                                <Link to="/admin/bookings" key={booking.id} className="flex justify-between items-center p-4 border-t border-admin-border hover:bg-admin-accent-light transition-colors" style={{ animation: `list-item-in 0.5s ease-out ${index * 50}ms forwards`, opacity: 0 }}>
-                                    <div>
-                                        <div className="font-bold text-admin-heading">{booking.profiles?.full_name || 'N/A'}</div>
-                                        <div className="text-admin-light">{booking.services?.name || 'Unknown'}</div>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className={`px-2.5 py-1 text-xs font-bold rounded-full bg-admin-light/10 ${STATUS_TEXT_COLORS[booking.status] || 'text-admin-light'}`}>{booking.status}</span>
-                                        <div className="text-xs text-admin-light/50 mt-1 font-mono">{new Date(booking.created_at).toLocaleDateString()}</div>
-                                    </div>
-                                </Link>
-                            ))
-                        )}
-                 </div>
-            </div>
-             <div className="p-4 text-center bg-admin-surface/50 border-t border-admin-border">
-                <Link to="/admin/bookings" className="text-sm font-bold text-admin-accent hover:underline">View All Bookings</Link>
-            </div>
-        </div>
-    );
-};
-
 
 const AdminDashboardPage: React.FC = () => {
-  const [stats, setStats] = useState({ services: 0, users: 0 });
-  const [allBookings, setAllBookings] = useState<Pick<Booking, 'id' | 'status'>[]>([]);
+  const { profile } = useAuth();
+  const [statusCounts, setStatusCounts] = useState<{[key: string]: number}>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       setLoading(true);
       try {
-        const [
-          { count: servicesCount, error: sErr },
-          { data: bookingsData, error: bErr },
-          { count: usersCount, error: uErr }
-        ] = await Promise.all([
-          supabase.from('services').select('*', { count: 'exact', head: true }),
-          supabase.from('bookings').select('id, status'), // Fetch all for chart
-          supabase.from('profiles').select('*', { count: 'exact', head: true })
-        ]);
-
-        if (sErr || bErr || uErr) {
-            const error = sErr || bErr || uErr;
-            console.error("Error fetching dashboard stats:", error.message, error);
-            throw new Error('Failed to fetch stats');
-        }
-
-        setStats({
-          services: servicesCount ?? 0,
-          users: usersCount ?? 0,
-        });
-        setAllBookings((bookingsData as Pick<Booking, 'id' | 'status'>[]) || []);
+        const { data, error } = await supabase.from('bookings').select('status');
+        if (error) throw error;
+        
+        const counts = (data as {status: string}[]).reduce((acc, {status}) => {
+            acc[status] = (acc[status] || 0) + 1;
+            return acc;
+        }, {} as {[key: string]: number});
+        
+        setStatusCounts(counts);
 
       } catch (error) {
         console.error("Error fetching stats:", error);
@@ -192,25 +95,76 @@ const AdminDashboardPage: React.FC = () => {
         setLoading(false);
       }
     };
-
     fetchStats();
   }, []);
 
+  const analyticsCards = [
+      { title: 'Pending', value: statusCounts['Pending'] || 0, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'bg-yellow-100 text-yellow-600' },
+      { title: 'Approved', value: statusCounts['Approved'] || 0, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'bg-green-100 text-green-600' },
+      { title: 'Completed', value: statusCounts['Completed'] || 0, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" /></svg>, color: 'bg-purple-100 text-purple-600' },
+      { title: 'Rejected', value: statusCounts['Rejected'] || 0, icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>, color: 'bg-red-100 text-red-600' }
+  ];
+  
+  const donutData = [
+      { color: 'text-yellow-400', value: statusCounts['Pending'] || 0, label: 'Pending' },
+      { color: 'text-blue-400', value: statusCounts['In Review'] || 0, label: 'Ongoing' },
+      { color: 'text-green-400', value: statusCounts['Completed'] || 0, label: 'Completed' },
+      { color: 'text-red-400', value: statusCounts['Rejected'] || 0, label: 'Rejected' },
+  ];
+
   return (
     <div className="space-y-8">
-        <h1 className="text-4xl font-extrabold text-admin-heading tracking-tight">Dashboard</h1>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <StatCard delay={0} title="Total Services" value={stats.services} loading={loading} color="admin-purple" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>} />
-            <StatCard delay={50} title="Total Bookings" value={allBookings.length} loading={loading} color="admin-accent" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg>} />
-            <StatCard delay={100} title="Registered Users" value={stats.users} loading={loading} color="admin-pink" icon={<svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M15 21v-2a4 4 0 00-4-4H9a4 4 0 00-4 4v2" /></svg>} />
+        <div>
+            <h2 className="text-2xl font-bold text-admin-heading">Welcome, {profile?.full_name?.split(' ')[0] || 'Admin'}!</h2>
+            <p className="text-admin-light">Monitor your business analytics and statistics</p>
         </div>
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 items-start">
-             <div className="lg:col-span-3">
-                <StatsChart bookings={allBookings} loading={loading} />
-             </div>
-             <div className="lg:col-span-2">
-                <RecentBookings />
-             </div>
+
+        {/* Business Analytics */}
+        <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-admin-heading">Business Analytics</h3>
+            {loading ? (
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {Array.from({length: 4}).map((_, i) => <div key={i} className="h-24 bg-admin-card-bg rounded-xl animate-pulse"></div>)}
+                 </div>
+            ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {analyticsCards.map(card => <StatCard key={card.title} {...card} />)}
+                </div>
+            )}
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Order Statistics */}
+            <div className="lg:col-span-2 bg-admin-card-bg p-6 rounded-xl shadow-sm border border-admin-card-border">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-semibold text-admin-heading">Order Statistics</h3>
+                    <div className="flex gap-1 bg-admin-main-bg p-1 rounded-lg">
+                        <button className="px-3 py-1 text-xs font-semibold rounded-md bg-admin-card-bg text-admin-accent shadow-sm">This Year</button>
+                        <button className="px-3 py-1 text-xs font-semibold rounded-md text-admin-light">This Month</button>
+                        <button className="px-3 py-1 text-xs font-semibold rounded-md text-admin-light">This Week</button>
+                    </div>
+                </div>
+                <LineChartPlaceholder/>
+            </div>
+
+            {/* Order Status Statistics */}
+            <div className="bg-admin-card-bg p-6 rounded-xl shadow-sm border border-admin-card-border">
+                <h3 className="font-semibold text-admin-heading mb-4">Order Status Statistics</h3>
+                <div className="flex justify-center items-center">
+                    <DonutChartPlaceholder values={donutData} />
+                </div>
+                <div className="mt-4 space-y-2">
+                   {donutData.map(item => (
+                       <div key={item.label} className="flex items-center justify-between text-sm">
+                           <div className="flex items-center gap-2">
+                               <div className={`w-3 h-3 rounded-full ${item.color.replace('text-', 'bg-')}`}></div>
+                               <span className="text-admin-light">{item.label}</span>
+                           </div>
+                           <span className="font-semibold text-admin-heading">{item.value}</span>
+                       </div>
+                   ))}
+                </div>
+            </div>
         </div>
     </div>
   );

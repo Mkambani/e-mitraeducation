@@ -1,5 +1,3 @@
-
-
 import React, { useState, useContext, useEffect, useReducer } from 'react';
 import { supabase } from '../../supabaseClient';
 import { Service, BookingConfig, FormField, DocumentRequirement } from '../../types';
@@ -117,27 +115,27 @@ const ServiceFormModal: React.FC<{
 
     return (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-start z-50 p-4 animate-fade-in overflow-y-auto">
-            <div className="bg-admin-surface-glass border border-admin-border rounded-2xl shadow-2xl w-full max-w-3xl my-8 flex flex-col mt-20">
-                <div className="p-6 border-b border-admin-border">
-                    <h2 className="text-2xl font-bold text-admin-heading">{service ? 'Edit' : 'Add'} Service</h2>
+            <div className="bg-admin-card-bg border border-admin-card-border rounded-xl shadow-2xl w-full max-w-3xl my-8 flex flex-col mt-20">
+                <div className="p-6 border-b border-admin-card-border">
+                    <h2 className="text-xl font-bold text-admin-heading">{service ? 'Edit' : 'Add'} Service</h2>
                 </div>
                 <form onSubmit={handleSubmit} className="flex-1 p-6 space-y-6">
                     {/* General Info */}
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Service Name" value={state.name} onChange={e => dispatch({type: 'SET_FIELD', field: 'name', value: e.target.value})} required className="w-full p-3 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition" />
-                        <input type="number" placeholder="Display Order" value={state.display_order} onChange={e => dispatch({type: 'SET_FIELD', field: 'display_order', value: Number(e.target.value)})} required className="w-full p-3 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition" />
+                        <input type="text" placeholder="Service Name" value={state.name} onChange={e => dispatch({type: 'SET_FIELD', field: 'name', value: e.target.value})} required className="w-full p-3 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition" />
+                        <input type="number" placeholder="Display Order" value={state.display_order} onChange={e => dispatch({type: 'SET_FIELD', field: 'display_order', value: Number(e.target.value)})} required className="w-full p-3 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition" />
                     </div>
-                    <textarea placeholder="Description" value={state.description || ''} onChange={e => dispatch({type: 'SET_FIELD', field: 'description', value: e.target.value})} className="w-full p-3 bg-admin-surface text-admin-heading border border-admin-border rounded-lg min-h-[80px] focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition"></textarea>
+                    <textarea placeholder="Description" value={state.description || ''} onChange={e => dispatch({type: 'SET_FIELD', field: 'description', value: e.target.value})} className="w-full p-3 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg min-h-[80px] focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition"></textarea>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <select value={state.icon_name} onChange={e => dispatch({type: 'SET_FIELD', field: 'icon_name', value: e.target.value})} className="w-full p-3 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition">
+                        <select value={state.icon_name} onChange={e => dispatch({type: 'SET_FIELD', field: 'icon_name', value: e.target.value})} className="w-full p-3 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition">
                             {iconList.map(icon => <option key={icon} value={icon}>{icon}</option>)}
                         </select>
-                        <select value={state.parent_id || ''} onChange={e => dispatch({type: 'SET_FIELD', field: 'parent_id', value: Number(e.target.value) || null})} className="w-full p-3 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition">
+                        <select value={state.parent_id || ''} onChange={e => dispatch({type: 'SET_FIELD', field: 'parent_id', value: Number(e.target.value) || null})} className="w-full p-3 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition">
                             <option value="">None (Top-Level Service)</option>
                             {flatServices.filter(s => s.id !== service?.id).map(s => <option key={s.id} value={s.id}>{'--'.repeat(s.level)} {s.name}</option>)}
                         </select>
                     </div>
-                    <div className="flex items-center gap-4 pt-4 border-t border-admin-border">
+                    <div className="flex items-center gap-4 pt-4 border-t border-admin-card-border">
                          <label className="flex items-center gap-3 font-semibold text-admin-heading"><input type="checkbox" checked={state.is_bookable} onChange={e => dispatch({type: 'SET_FIELD', field: 'is_bookable', value: e.target.checked})} className="w-5 h-5 accent-admin-accent rounded"/> Is Bookable</label>
                     </div>
 
@@ -152,26 +150,26 @@ const ServiceFormModal: React.FC<{
                                 onChange={e => dispatch({type: 'SET_FIELD', field: 'price', value: e.target.value ? Number(e.target.value) : null})} 
                                 step="0.01"
                                 min="0"
-                                className="w-full mt-1 p-2 bg-admin-surface text-admin-heading border border-admin-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition"
+                                className="w-full mt-1 p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-2 focus:ring-admin-accent focus:border-admin-accent transition"
                             />
                         </div>
                     )}
 
                     {/* Dynamic Booking Config */}
                     {state.is_bookable && (
-                        <div className="p-4 bg-admin-accent-light/30 dark:bg-admin-surface rounded-lg space-y-4 border border-admin-border">
+                        <div className="p-4 bg-admin-main-bg rounded-lg space-y-4 border border-admin-card-border">
                             <h3 className="font-bold text-admin-heading">Booking Configuration</h3>
-                            <div className="flex gap-2 border-b border-admin-border">
-                                <button type="button" onClick={() => setActiveConfigTab('form')} className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors ${activeConfigTab === 'form' ? 'bg-admin-surface text-admin-accent border-b-0' : 'text-admin-light border-b border-transparent'}`}>Form Fields</button>
-                                <button type="button" onClick={() => setActiveConfigTab('docs')} className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors ${activeConfigTab === 'docs' ? 'bg-admin-surface text-admin-accent border-b-0' : 'text-admin-light border-b border-transparent'}`}>Documents</button>
+                            <div className="flex gap-2 border-b border-admin-card-border">
+                                <button type="button" onClick={() => setActiveConfigTab('form')} className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors ${activeConfigTab === 'form' ? 'bg-admin-card-bg text-admin-accent border-b-0' : 'text-admin-light border-b border-transparent'}`}>Form Fields</button>
+                                <button type="button" onClick={() => setActiveConfigTab('docs')} className={`px-4 py-2 font-semibold text-sm rounded-t-lg transition-colors ${activeConfigTab === 'docs' ? 'bg-admin-card-bg text-admin-accent border-b-0' : 'text-admin-light border-b border-transparent'}`}>Documents</button>
                             </div>
                             
                             {activeConfigTab === 'form' && <div className="space-y-3">
                                 {(state.booking_config?.form_fields || []).map((field, index) => (
-                                    <div key={field.id} className="grid grid-cols-[1fr,1fr,1fr,auto] gap-2 p-2 bg-admin-bg/50 rounded-md animate-list-item-in">
-                                        <input value={field.label} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'label', value: e.target.value})} placeholder="Label" className="p-2 bg-admin-bg text-admin-light border border-admin-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
-                                        <input value={field.id} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'id', value: e.target.value})} placeholder="Field ID (no spaces)" className="p-2 bg-admin-bg text-admin-light border border-admin-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
-                                        <select value={field.type} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'type', value: e.target.value})} className="p-2 bg-admin-bg text-admin-light border border-admin-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition">
+                                    <div key={field.id} className="grid grid-cols-[1fr,1fr,1fr,auto] gap-2 p-2 bg-admin-main-bg/50 rounded-md animate-list-item-in">
+                                        <input value={field.label} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'label', value: e.target.value})} placeholder="Label" className="p-2 bg-admin-main-bg text-admin-light border border-admin-card-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
+                                        <input value={field.id} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'id', value: e.target.value})} placeholder="Field ID (no spaces)" className="p-2 bg-admin-main-bg text-admin-light border border-admin-card-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
+                                        <select value={field.type} onChange={e => dispatch({type:'UPDATE_FORM_FIELD', index, field: 'type', value: e.target.value})} className="p-2 bg-admin-main-bg text-admin-light border border-admin-card-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition">
                                             <option value="text">Text</option><option value="email">Email</option><option value="date">Date</option><option value="tel">Phone</option><option value="number">Number</option>
                                         </select>
                                         <div className="flex items-center gap-2 text-admin-light">
@@ -185,9 +183,9 @@ const ServiceFormModal: React.FC<{
 
                             {activeConfigTab === 'docs' && <div className="space-y-3">
                                 {(state.booking_config?.document_requirements || []).map((doc, index) => (
-                                    <div key={doc.id} className="grid grid-cols-[1fr,1fr,auto] gap-2 p-2 bg-admin-bg/50 rounded-md animate-list-item-in">
-                                         <input value={doc.name} onChange={e => dispatch({type:'UPDATE_DOC_REQ', index, field: 'name', value: e.target.value})} placeholder="Document Name" className="p-2 bg-admin-bg text-admin-light border border-admin-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
-                                         <input value={doc.description} onChange={e => dispatch({type:'UPDATE_DOC_REQ', index, field: 'description', value: e.target.value})} placeholder="Description" className="p-2 bg-admin-bg text-admin-light border border-admin-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
+                                    <div key={doc.id} className="grid grid-cols-[1fr,1fr,auto] gap-2 p-2 bg-admin-main-bg/50 rounded-md animate-list-item-in">
+                                         <input value={doc.name} onChange={e => dispatch({type:'UPDATE_DOC_REQ', index, field: 'name', value: e.target.value})} placeholder="Document Name" className="p-2 bg-admin-main-bg text-admin-light border border-admin-card-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
+                                         <input value={doc.description} onChange={e => dispatch({type:'UPDATE_DOC_REQ', index, field: 'description', value: e.target.value})} placeholder="Description" className="p-2 bg-admin-main-bg text-admin-light border border-admin-card-border rounded text-sm focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition" />
                                          <button type="button" onClick={() => dispatch({type: 'REMOVE_DOC_REQ', index})} className="text-red-500 hover:text-red-400 p-1 font-bold">&times;</button>
                                     </div>
                                 ))}
@@ -196,7 +194,7 @@ const ServiceFormModal: React.FC<{
                         </div>
                     )}
                 </form>
-                <div className="p-4 border-t border-admin-border bg-admin-surface/50 rounded-b-2xl flex justify-end gap-3">
+                <div className="p-4 border-t border-admin-card-border bg-admin-main-bg/50 rounded-b-xl flex justify-end gap-3">
                     <button type="button" onClick={onClose} className="px-5 py-2.5 bg-admin-light/20 text-admin-heading font-semibold rounded-lg hover:bg-admin-light/30 transition">Cancel</button>
                     <button onClick={handleSubmit} disabled={loading} className="px-5 py-2.5 bg-admin-accent text-white font-semibold rounded-lg hover:brightness-110 disabled:bg-slate-400 transition shadow-md hover:shadow-lg shadow-admin-accent/30">
                         {loading ? 'Saving...' : 'Save Service'}
@@ -220,7 +218,7 @@ const ServiceListItem: React.FC<{
 
     return (
         <div className="animate-list-item-in" style={{ animationDelay: `${level * 10}ms` }}>
-            <div className="flex items-center bg-admin-surface/70 hover:bg-admin-accent-light transition-colors group" style={{ paddingLeft: `${1 + level * 2}rem` }}>
+            <div className="flex items-center hover:bg-admin-main-bg transition-colors group" style={{ paddingLeft: `${1 + level * 2}rem` }}>
                  <div className="flex-1 flex items-center gap-4 py-3">
                     <button onClick={() => setIsExpanded(!isExpanded)} disabled={!hasSubServices} className="text-admin-light/50 disabled:invisible hover:text-admin-light">
                        <svg xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 transition-transform ${isExpanded ? 'rotate-90' : ''}`} viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" /></svg>
@@ -228,7 +226,7 @@ const ServiceListItem: React.FC<{
                     <IconMap iconName={service.icon_name} className="h-6 w-6 text-admin-accent" />
                     <span className="font-bold text-admin-heading">{service.name}</span>
                     <span className="font-mono text-sm text-admin-light/40">#{service.id}</span>
-                    {!service.is_bookable && <span className="text-xs font-bold uppercase text-admin-light/60 bg-admin-surface-glass border border-admin-border px-2 py-0.5 rounded-full">Category</span>}
+                    {!service.is_bookable && <span className="text-xs font-bold uppercase text-admin-light/60 bg-admin-main-bg border border-admin-card-border px-2 py-0.5 rounded-full">Category</span>}
                 </div>
                 <div className="px-4 py-3 flex items-center gap-4 opacity-0 group-hover:opacity-100 transition-opacity">
                     {service.is_bookable && <span className="font-bold text-sm text-green-500 font-mono">{service.price === 0 ? 'FREE' : `₹${service.price}`}</span>}
@@ -238,7 +236,7 @@ const ServiceListItem: React.FC<{
                 </div>
             </div>
             {isExpanded && hasSubServices && (
-                <div className="border-l border-admin-border/50">
+                <div className="border-l border-admin-card-border/50">
                     {service.subServices?.map(sub => (
                         <ServiceListItem key={sub.id} service={sub} level={level + 1} onEdit={onEdit} onDelete={onDelete} onAddSub={onAddSub} />
                     ))}
@@ -284,17 +282,17 @@ const AdminServicesPage: React.FC = () => {
   }
 
   return (
-    <div className="space-y-6">
-        <div className="flex justify-between items-center">
-             <h1 className="text-3xl font-extrabold text-admin-heading tracking-tight">Manage Services</h1>
-             <button onClick={() => openModal()} className="px-6 py-3 bg-admin-accent text-white font-bold rounded-xl shadow-lg hover:brightness-110 hover:shadow-xl shadow-admin-accent/30 transition-all transform hover:-translate-y-0.5">
+    <div className="bg-admin-card-bg p-6 rounded-xl shadow-sm border border-admin-card-border">
+        <div className="flex justify-between items-center mb-6 pb-6 border-b border-admin-card-border">
+             <h2 className="text-xl font-bold text-admin-heading">Services List</h2>
+             <button onClick={() => openModal()} className="px-4 py-2 bg-admin-accent text-white font-bold rounded-lg shadow-sm hover:bg-admin-accent/90 transition-all text-sm">
                 Add Top-Level Service
             </button>
         </div>
         
-        <div className="bg-admin-surface-glass border border-admin-border backdrop-blur-2xl rounded-2xl shadow-xl shadow-black/10 overflow-hidden">
-              {serviceLoading ? <div className="p-10 text-center animate-pulse text-admin-light">Loading services...</div> : (
-                  <div className="divide-y divide-admin-border">
+        <div className="overflow-hidden">
+              {serviceLoading ? <div className="p-10 text-center text-admin-light">Loading services...</div> : (
+                  <div className="divide-y divide-admin-card-border">
                       {allServices.map(service => (
                           <ServiceListItem 
                             key={service.id} 

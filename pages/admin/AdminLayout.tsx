@@ -1,15 +1,9 @@
-
-
-
-
-
-
-
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
+import { useTheme } from '../../context/ThemeContext';
 
-const { NavLink, Outlet, useLocation } = ReactRouterDOM as any;
+const { NavLink, Outlet, useLocation, Link } = ReactRouterDOM as any;
 
 // --- ICONS ---
 const DashboardIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.5 4.5a.75.75 0 00-1.5 0v15a.75.75 0 001.5 0v-15z" /><path d="M4.5 10.5a.75.75 0 00-1.5 0v9a.75.75 0 001.5 0v-9z" /><path d="M16.5 7.5a.75.75 0 00-1.5 0v12a.75.75 0 001.5 0v-12z" /></svg>;
@@ -19,88 +13,154 @@ const BookingsIcon = (props: { className?: string }) => <svg {...props} xmlns="h
 const UsersIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 6.375a4.125 4.125 0 118.25 0 4.125 4.125 0 01-8.25 0zM14.25 8.625a3.375 3.375 0 116.75 0 3.375 3.375 0 01-6.75 0zM5.25 15.375a3.75 3.75 0 00-3.75 3.75v.625c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125v-.625a3.75 3.75 0 00-3.75-3.75H5.25zM14.25 15.375a3.75 3.75 0 00-3.75 3.75v.625c0 .621.504 1.125 1.125 1.125h5.25c.621 0 1.125-.504 1.125-1.125v-.625a3.75 3.75 0 00-3.75-3.75h-1.5z" /></svg>;
 const NotificationsIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M10.25 2.25a.75.75 0 00-1.5 0v1.5c-2.383.478-4.444 2.14-5.59 4.313-.23.435-.165.968.163 1.348l.394.463c.27.318.495.688.643 1.094.148.406.22.848.22 1.292v.266a.75.75 0 01-1.5 0v-.266c0-.645-.105-1.28-.309-1.883a4.42 4.42 0 01-.67-1.423l-.395-.463a1.765 1.765 0 01-.37-1.58C1.516 6.905 3.51 4.79 5.86 3.903L6 3.75a.75.75 0 000-1.5H5.25a.75.75 0 000 1.5h.03a6.992 6.992 0 006.945 6.945.75.75 0 001.5 0A6.992 6.992 0 0012 3.75h.03a.75.75 0 000-1.5H12a.75.75 0 00-.75.75v.03A6.992 6.992 0 004.305 12H3.75a.75.75 0 000 1.5h.555a6.992 6.992 0 006.945 6.945.75.75 0 001.5 0A6.992 6.992 0 0018.695 12h.555a.75.75 0 000-1.5h-.555A6.992 6.992 0 0011.25 3.75V2.25z" /><path d="M14.5 9a3.5 3.5 0 11-7 0 3.5 3.5 0 017 0z" /></svg>;
 const PaymentIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M4.5 3.75a3 3 0 00-3 3v10.5a3 3 0 003 3h15a3 3 0 003-3V6.75a3 3 0 00-3-3h-15z" /><path d="M22.5 9.75h-21v7.5a3 3 0 003 3h15a3 3 0 003-3v-7.5zM12 12.75a.75.75 0 01.75-.75h3a.75.75 0 010 1.5h-3a.75.75 0 01-.75-.75z" /></svg>;
-const SettingsIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 5.85a1.5 1.5 0 00.92 1.83l.84.42a1.5 1.5 0 001.83-.92l.18-1.03a1.5 1.5 0 00-1.49-1.88l-1.03.18a.75.75 0 01-.62.36v-.38a.75.75 0 01.62-.36l.38.21a.75.75 0 00.92-.18l.84-.84a.75.75 0 00.18-.92l-.21-.38a.75.75 0 00-.36-.62l-1.03.18a1.5 1.5 0 00-1.88-1.49l.18-1.03A1.875 1.875 0 0011.078 2.25zM12.922 2.25c.917 0 1.699.663 1.85 1.567L14.95 5.85a1.5 1.5 0 01-.92 1.83l-.84.42a1.5 1.5 0 01-1.83-.92l-.18-1.03a1.5 1.5 0 011.49-1.88l1.03.18a.75.75 0 00.62.36v-.38a.75.75 0 00-.62-.36l-.38.21a.75.75 0 01-.92-.18l-.84-.84a.75.75 0 01-.18-.92l.21-.38a.75.75 0 01.36-.62l1.03.18a1.5 1.5 0 011.88-1.49l-.18-1.03A1.875 1.875 0 0112.922 2.25zM21 11.078c0 .917-.663 1.699-1.567 1.85l-2.03.18a1.5 1.5 0 00-1.83.92l-.42.84a1.5 1.5 0 00.92 1.83l1.03.18a1.5 1.5 0 001.88-1.49l-.18 1.03c.24 1.35.36 2.7.36 4.05v.38c0 .414-.336.75-.75.75h-.38c-1.35 0-2.7-.12-4.05-.36l-1.03.18a1.5 1.5 0 01-1.49-1.88l.18-1.03a1.5 1.5 0 01.92-1.83l.84-.42a1.5 1.5 0 01.92-1.83l-.84-.84a.75.75 0 00-.92.18l-.38-.21a.75.75 0 00-.36.62l.18 1.03a1.5 1.5 0 01-1.88 1.49l-1.03-.18a1.5 1.5 0 00-1.83.92l-.42-.84a1.5 1.5 0 00-1.83-.92l-1.03-.18a.75.75 0 01-.62-.36v.38a.75.75 0 01.62.36l.38-.21a.75.75 0 01.92.18l.84.84a.75.75 0 01.18.92l-.21.38a.75.75 0 01-.36.62l-1.03-.18a1.5 1.5 0 00-1.88 1.49l-.18-1.03A1.875 1.875 0 012.25 12.922v-1.844c0-.917.663-1.699 1.567-1.85l2.03-.18a1.5 1.5 0 001.83-.92l.42-.84a1.5 1.5 0 00-.92-1.83l-1.03-.18a1.5 1.5 0 00-1.88 1.49l.18-1.03A1.875 1.875 0 013 7.078V6.69c0-.414.336-.75.75-.75h.38c1.35 0 2.7.12 4.05.36l1.03-.18a1.5 1.5 0 011.49 1.88l-.18 1.03a1.5 1.5 0 01-.92 1.83l-.84.42a1.5 1.5 0 01-.92 1.83l.84.84a.75.75 0 00.92-.18l.38.21a.75.75 0 00.36-.62l-.18-1.03a1.5 1.5 0 011.88-1.49l1.03.18a1.5 1.5 0 001.83-.92l.42.84a1.5 1.5 0 001.83.92l1.03.18a.75.75 0 01.62.36v-.38a.75.75 0 01-.62-.36l-.38-.21a.75.75 0 01-.92-.18l-.84-.84a.75.75 0 01-.18-.92l.21-.38a.75.75 0 01.36-.62l1.03.18a1.5 1.5 0 001.88-1.49l.18 1.03A1.875 1.875 0 0121 11.078z" clipRule="evenodd" /></svg>;
+const SettingsIcon = (props: { className?: string }) => <svg {...props} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path fillRule="evenodd" d="M11.078 2.25c-.917 0-1.699.663-1.85 1.567L9.05 5.85a1.5 1.5 0 00.92 1.83l.84.42a1.5 1.5 0 001.83-.92l.18-1.03a1.5 1.5 0 00-1.49-1.88l-1.03.18a.75.75 0 01-.62.36v-.38a.75.75 0 01.62-.36l.38.21a.75.75 0 00.92-.18l.84-.84a.75.75 0 00.18-.92l-.21-.38a.75.75 0 00-.36-.62l-1.03.18a1.5 1.5 0 00-1.88-1.49l.18-1.03A1.875 1.875 0 0011.078 2.25zM12.922 2.25c.917 0 1.699.663 1.85 1.567L14.95 5.85a1.5 1.5 0 01-.92 1.83l-.84.42a1.5 1.5 0 01-1.83-.92l-.18-1.03a1.5 1.5 0 011.49-1.88l1.03.18a.75.75 0 00.62.36v-.38a.75.75 0 00-.62-.36l-.38.21a.75.75 0 01-.92-.18l-.84-.84a.75.75 0 01-.18-.92l.21-.38a.75.75 0 01.36-.62l1.03.18a1.5 1.5 0 011.88-1.49l-.18-1.03A1.875 1.875 0 0112.922 2.25zM21 11.078c0 .917-.663 1.699-1.567 1.85l-2.03.18a1.5 1.5 0 00-1.83.92l-.42.84a1.5 1.5 0 00.92 1.83l1.03.18a1.5 1.5 0 001.88-1.49l-.18 1.03c.24 1.35.36 2.7.36 4.05v.38c0 .414-.336.75-.75.75h-.38c-1.35 0-2.7-.12-4.05-.36l-1.03.18a1.5 1.5 0 01-1.49-1.88l.18-1.03a1.5 1.5 0 01.92-1.83l.84-.42a1.5 1.5 0 01.92-1.83l-.84-.84a.75.75 0 00-.92.18l-.38-.21a.75.75 0 00-.36.62l.18 1.03a1.5 1.5 0 01-1.88 1.49l-1.03-.18a1.5 1.5 0 00-1.83.92l-.42-.84a1.5 1.5 0 00-1.83-.92l-1.03-.18a.75.75 0 01-.62-.36v.38a.75.75 0 01.62.36l.38-.21a.75.75 0 01.92.18l.84.84a.75.75 0 01.18.92l-.21.38a.75.75 0 01-.36.62l-1.03-.18a1.5 1.5 0 00-1.88 1.49l-.18-1.03A1.875 1.875 0 012.25 12.922v-1.844c0-.917.663-1.699 1.567-1.85l2.03-.18a1.5 1.5 0 001.83-.92l.42-.84a1.5 1.5 0 00-.92-1.83l-1.03-.18a1.5 1.5 0 00-1.88 1.49l.18-1.03A1.875 1.875 0 013 7.078V6.69c0-.414.336.75.75-.75h.38c1.35 0 2.7.12 4.05.36l1.03-.18a1.5 1.5 0 011.49 1.88l-.18 1.03a1.5 1.5 0 01-.92 1.83l-.84.42a1.5 1.5 0 01-.92 1.83l.84.84a.75.75 0 00.92-.18l.38.21a.75.75 0 00.36-.62l-.18-1.03a1.5 1.5 0 011.88-1.49l1.03.18a1.5 1.5 0 001.83-.92l.42.84a1.5 1.5 0 001.83.92l1.03.18a.75.75 0 01.62.36v-.38a.75.75 0 01-.62-.36l-.38-.21a.75.75 0 01-.92-.18l-.84-.84a.75.75 0 01-.18-.92l.21-.38a.75.75 0 01.36-.62l1.03.18a1.5 1.5 0 001.88-1.49l.18 1.03A1.875 1.875 0 0121 11.078z" clipRule="evenodd" /></svg>;
 
-const navItems = [
-  { name: 'Dashboard', href: '/admin', end: true, icon: DashboardIcon },
-  { name: 'Services', href: '/admin/services', end: false, icon: ServicesIcon },
-  { name: 'Promo Banner', href: '/admin/promo-banner', end: false, icon: PromoIcon },
-  { name: 'Bookings', href: '/admin/bookings', end: false, icon: BookingsIcon },
-  { name: 'Users', href: '/admin/users', end: false, icon: UsersIcon },
-  { name: 'Notifications', href: '/admin/notifications', end: false, icon: NotificationsIcon },
-  { name: 'Payment Gateways', href: '/admin/payment-gateways', end: false, icon: PaymentIcon },
-  { name: 'App Settings', href: '/admin/settings', end: false, icon: SettingsIcon },
+const navGroups = [
+  {
+    title: 'Management',
+    items: [
+      { name: 'Dashboard', href: '/admin', end: true, icon: DashboardIcon },
+      { name: 'Bookings', href: '/admin/bookings', end: false, icon: BookingsIcon },
+      { name: 'Services', href: '/admin/services', end: false, icon: ServicesIcon },
+      { name: 'Users', href: '/admin/users', end: false, icon: UsersIcon },
+    ],
+  },
+  {
+    title: 'Configuration',
+    items: [
+      { name: 'Promo Banner', href: '/admin/promo-banner', end: false, icon: PromoIcon },
+      { name: 'Notifications', href: '/admin/notifications', end: false, icon: NotificationsIcon },
+      { name: 'Payment Gateways', href: '/admin/payment-gateways', end: false, icon: PaymentIcon },
+      { name: 'App Settings', href: '/admin/settings', end: false, icon: SettingsIcon },
+    ],
+  },
 ];
+
+const pageTitles: { [key: string]: string } = {
+    '/admin': 'Dashboard',
+    '/admin/services': 'Manage Services',
+    '/admin/promo-banner': 'Promo Banner',
+    '/admin/bookings': 'All Bookings',
+    '/admin/users': 'User Management',
+    '/admin/notifications': 'Broadcast Notifications',
+    '/admin/payment-gateways': 'Payment Gateways',
+    '/admin/settings': 'Application Settings',
+};
+
+
+const AdminHeader: React.FC<{ title: string; onMenuClick: () => void; }> = ({ title, onMenuClick }) => {
+    const { profile } = useAuth();
+    const { theme, toggleTheme } = useTheme();
+
+    return (
+        <header className="flex justify-between items-center">
+            <div className="flex items-center gap-2">
+                <button onClick={onMenuClick} className="p-2 -ml-2 text-admin-heading md:hidden">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" /></svg>
+                </button>
+                <h1 className="text-2xl md:text-3xl font-bold text-admin-heading">{title}</h1>
+            </div>
+            <div className="flex items-center gap-2 sm:gap-4">
+                <button
+                    onClick={toggleTheme}
+                    className="w-10 h-10 flex items-center justify-center rounded-full text-slate-500 dark:text-slate-400 hover:bg-admin-card-bg dark:hover:bg-admin-sidebar-active-bg transition-colors"
+                    aria-label="Toggle theme"
+                >
+                    {theme === 'light' ? 
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg> :
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                    }
+                </button>
+
+                <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-admin-accent flex items-center justify-center font-bold text-white">
+                        {profile?.full_name?.charAt(0) || 'A'}
+                    </div>
+                    <div className="text-right hidden sm:block">
+                        <p className="font-semibold text-admin-heading">{profile?.full_name}</p>
+                        <p className="text-xs text-admin-light">{profile?.role}</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+    );
+};
+
 
 const AdminLayout: React.FC = () => {
     const location = useLocation();
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
-    // Effect to toggle a class on the body for admin-specific global styles
     useEffect(() => {
-        document.body.classList.add('admin-panel-active');
-        return () => {
-            document.body.classList.remove('admin-panel-active');
-        }
-    }, []);
+        setIsSidebarOpen(false);
+    }, [location.pathname]);
+
+    const currentPageTitle = useMemo(() => {
+        return pageTitles[location.pathname] || 'Admin';
+    }, [location.pathname]);
 
   return (
-    <div className="font-admin text-admin-light bg-admin-bg min-h-screen relative overflow-hidden transition-colors duration-500">
-        {/* Animated Gradient Mesh Background */}
-        <div className="gradient-mesh-bg"></div>
-        <style>{`
-          .gradient-mesh-bg {
-              position: fixed;
-              top: 0; left: 0; right: 0; bottom: 0;
-              background-image:
-                  radial-gradient(at 27% 37%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 97% 21%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 52% 99%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 10% 29%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 97% 96%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 33% 50%, var(--admin-accent-light) 0px, transparent 50%),
-                  radial-gradient(at 79% 53%, var(--admin-accent-light) 0px, transparent 50%);
-              background-size: 300% 300%;
-              animation: gradient-mesh 15s ease-in-out infinite;
-              z-index: 0;
-              transition: opacity 0.5s;
-          }
-          body.admin-panel-active {
-            background-color: var(--admin-bg);
-          }
-        `}</style>
-      
-        <div className="relative z-10 flex flex-col md:flex-row gap-8 lg:gap-12">
+    <div className="font-admin bg-admin-main-bg min-h-screen">
+        <div className="flex">
+            {/* Mobile Overlay */}
+            {isSidebarOpen && (
+                <div 
+                    className="fixed inset-0 bg-black/50 z-30 md:hidden" 
+                    onClick={() => setIsSidebarOpen(false)}
+                ></div>
+            )}
+            
             {/* Sidebar */}
-            <aside className="md:w-64 flex-shrink-0">
-                <div className="sticky top-24 bg-admin-surface-glass backdrop-blur-3xl p-4 rounded-3xl border border-admin-border shadow-2xl shadow-black/20">
-                    <h2 className="text-sm font-bold text-admin-light/70 mb-4 px-2 uppercase tracking-widest font-mono">Control Panel</h2>
-                    <nav className="flex flex-col gap-1.5">
-                        {navItems.map((item, index) => (
-                            <NavLink
-                                key={item.name}
-                                to={item.href}
-                                end={item.end}
-                                style={{ animationDelay: `${index * 50}ms` }}
-                                className="flex items-center gap-4 px-4 py-3 rounded-xl text-base font-semibold transition-all duration-200 ease-in-out group relative animate-list-item-in text-admin-light hover:text-admin-heading hover:bg-admin-accent-light"
-                            >
-                                {({ isActive }) => (
-                                    <>
-                                        <div className={`absolute inset-0 rounded-xl transition-all duration-300 ${isActive ? 'bg-admin-accent-light' : ''}`}></div>
-                                        <div className={`absolute left-0 top-0 bottom-0 w-1 bg-admin-accent rounded-r-full transition-transform duration-300 ease-out-expo ${isActive ? 'scale-y-100' : 'scale-y-0'}`}></div>
-                                        
-                                        <item.icon className={`relative h-6 w-6 transition-colors ${isActive ? 'text-admin-accent' : 'text-admin-light/70 group-hover:text-admin-heading'}`} />
-                                        <span className={`relative transition-colors ${isActive ? 'text-admin-heading' : ''}`}>{item.name}</span>
-                                    </>
-                                )}
-                            </NavLink>
-                        ))}
-                    </nav>
+            <aside className={`w-64 flex-shrink-0 bg-admin-sidebar-bg h-screen fixed top-0 left-0 flex flex-col p-4 z-40 transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+                <Link to="/admin" className="flex items-center gap-2 px-2 pb-4 mb-4 border-b border-white/10">
+                   <span className="font-bold text-2xl text-admin-sidebar-heading">near</span>
+                   <span className="font-bold text-2xl text-admin-sidebar-icon">me.</span>
+                </Link>
+
+                <div className="relative mb-4">
+                    <input type="text" placeholder="Search..." className="w-full bg-black/20 text-admin-sidebar-text placeholder:text-admin-sidebar-text/60 rounded-lg py-2 pl-10 pr-4 text-sm border border-transparent focus:outline-none focus:ring-2 focus:ring-admin-sidebar-icon"/>
+                    <svg className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-admin-sidebar-text/60" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clipRule="evenodd" /></svg>
                 </div>
+
+                <nav className="flex-1 overflow-y-auto space-y-4">
+                    {navGroups.map((group) => (
+                        <div key={group.title}>
+                             <h3 className="px-2 mb-2 text-xs font-semibold text-admin-sidebar-text/50 uppercase tracking-wider">{group.title}</h3>
+                             <div className="space-y-1">
+                                {group.items.map(item => (
+                                    <NavLink
+                                        key={item.name}
+                                        to={item.href}
+                                        end={item.end}
+                                        className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors duration-200 ease-in-out group ${
+                                            isActive ? 'bg-admin-sidebar-active-bg text-admin-sidebar-heading' : 'text-admin-sidebar-text hover:bg-white/10 hover:text-white'
+                                        }`}
+                                    >
+                                        <item.icon className="h-5 w-5"/>
+                                        <span>{item.name}</span>
+                                    </NavLink>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </nav>
+
+                 <div className="pt-4 mt-4 border-t border-white/10">
+                     <Link to="/" className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-admin-sidebar-text hover:bg-white/10 hover:text-white">
+                        <svg className="h-5 w-5" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M15 10a.75.75 0 01-.75.75H7.612l2.158 1.96a.75.75 0 11-1.04 1.08l-3.5-3.25a.75.75 0 010-1.08l3.5-3.25a.75.75 0 111.04 1.08L7.612 9.25H14.25A.75.75 0 0115 10z" clipRule="evenodd" /></svg>
+                        Back to Main Site
+                     </Link>
+                 </div>
             </aside>
 
             {/* Main Content */}
-            <main key={location.pathname} className="flex-1 min-w-0 animate-content-in">
-                <Outlet />
+            <main key={location.pathname} className="flex-1 md:ml-64 p-6 md:p-8 lg:p-10 min-w-0">
+                <div className="animate-content-in">
+                    <AdminHeader title={currentPageTitle} onMenuClick={() => setIsSidebarOpen(true)} />
+                    <div className="mt-8">
+                        <Outlet />
+                    </div>
+                </div>
             </main>
         </div>
     </div>

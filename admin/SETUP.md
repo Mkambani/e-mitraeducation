@@ -17,7 +17,8 @@
 -- 4. Toggle ON the "Public bucket" option.
 -- 5. Click "Create bucket".
 --
--- After creating the bucket, you can proceed with running the SQL below.
+-- TROUBLESHOOTING: If you see an error like {"error":"Bucket not found"}, it means
+-- this step was missed or the bucket was named incorrectly. Please double-check.
 -- -----------------------------------------------------------------------------
 
 -- 0. EXTENSIONS
@@ -164,28 +165,22 @@ CREATE POLICY "Allow public read access to active banners" ON public.promo_banne
 DROP POLICY IF EXISTS "Admins can manage all banners" ON public.promo_banners;
 CREATE POLICY "Admins can manage all banners" ON public.promo_banners FOR ALL USING (public.get_my_role() = 'admin');
 
--- Notifications Policies (FIXED)
+-- Notifications Policies
+-- This section is updated to ensure admins have full access and to simplify user policies.
 DROP POLICY IF EXISTS "Users can manage their own notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Admins can create notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Users can SELECT their own notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Users can UPDATE their own notifications" ON public.notifications;
 DROP POLICY IF EXISTS "Users can DELETE their own notifications" ON public.notifications;
+DROP POLICY IF EXISTS "Admins can manage all notifications" ON public.notifications;
 
--- Users can VIEW their notifications.
-CREATE POLICY "Users can SELECT their own notifications" ON public.notifications
-    FOR SELECT USING (auth.uid() = user_id);
+-- Users can perform all actions on their own notifications.
+CREATE POLICY "Users can manage own notifications" ON public.notifications FOR ALL
+    USING (auth.uid() = user_id);
 
--- Users can UPDATE their notifications (e.g. mark as read).
-CREATE POLICY "Users can UPDATE their own notifications" ON public.notifications
-    FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
-
--- Users can DELETE their notifications.
-CREATE POLICY "Users can DELETE their own notifications" ON public.notifications
-    FOR DELETE USING (auth.uid() = user_id);
-
--- Admins can CREATE notifications for any user (e.g., from the booking panel).
-CREATE POLICY "Admins can create notifications" ON public.notifications
-    FOR INSERT WITH CHECK (public.get_my_role() = 'admin');
+-- Admins can perform all actions on any notification.
+CREATE POLICY "Admins can manage all notifications" ON public.notifications FOR ALL
+    USING (public.get_my_role() = 'admin');
 
 
 -- Payment Gateways Policies
@@ -310,13 +305,18 @@ BEGIN
 
   -- Insert default payment gateways
   INSERT INTO public.payment_gateways (key, name, icon_name, is_active, display_order, config) VALUES
-  ('razorpay', 'Card, UPI, Netbanking', 'RazorpayIcon', true, 10, '{"key_id": "YOUR_RAZORPAY_KEY_ID"}'),
+  ('razorpay', 'Card, UPI, Netbanking', 'RazorpayIcon', true, 10, '{"key_id": "YOUR_RAZORPAY_KEY_ID", "description": "Pay with all major cards, UPI, and wallets."}'),
   ('cod', 'Cash on Delivery', 'CashIcon', true, 20, '{"description": "Pay at the time of service completion."}');
 
 END $$;
 
 -- 6. STORAGE SETUP (POLICIES)
 -- After creating the public 'documents' bucket in the dashboard, run these policies.
+
+-- Drop existing policies first to ensure the script is re-runnable.
+DROP POLICY IF EXISTS "Authenticated users can upload documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can view their own documents" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own documents" ON storage.objects;
 
 -- Policy: Allow authenticated users to upload files into their own folder.
 CREATE POLICY "Authenticated users can upload documents" ON storage.objects

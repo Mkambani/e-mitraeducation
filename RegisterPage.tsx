@@ -61,19 +61,19 @@ const RegisterPage: React.FC = () => {
   
   if (successMessage) {
     return (
-        <div className="flex items-center justify-center min-h-[calc(100vh-250px)] bg-slate-50 p-4">
-            <div className="max-w-lg w-full space-y-6 bg-white p-10 rounded-3xl shadow-2xl border border-slate-200/50 text-center">
-                <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-cyan-100">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <div className="flex items-center justify-center min-h-[calc(100vh-250px)] p-4">
+            <div className="max-w-lg w-full space-y-6 bg-white dark:bg-slate-800 p-10 rounded-3xl shadow-2xl border border-slate-200/50 dark:border-slate-700 text-center">
+                <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-cyan-100 dark:bg-cyan-900/50">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-cyan-600 dark:text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                         <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                     </svg>
                 </div>
-                 <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                 <h2 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                     Confirm Your Email
                 </h2>
-                <p className="text-green-700 bg-green-50 p-4 rounded-lg border border-green-200">{successMessage}</p>
-                 <p className="text-sm text-slate-600">
-                    We've sent a confirmation link to <span className="font-semibold text-slate-800">{email}</span>. Click it to activate your account.
+                <p className="text-green-700 dark:text-green-300 bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-500/30">{successMessage}</p>
+                 <p className="text-sm text-slate-600 dark:text-slate-400">
+                    We've sent a confirmation link to <span className="font-semibold text-slate-800 dark:text-slate-200">{email}</span>. Click it to activate your account.
                 </p>
                  <Link to="/login" className="inline-block mt-6 px-8 py-3 text-base font-bold text-white bg-cyan-500 rounded-xl shadow-lg hover:shadow-xl hover:bg-cyan-600 transition-all duration-300 ease-in-out transform hover:-translate-y-1">
                     Back to Login
@@ -84,8 +84,8 @@ const RegisterPage: React.FC = () => {
   }
 
   return (
-     <div className="flex items-center justify-center min-h-[calc(100vh-250px)] bg-slate-50 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl w-full bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-200/50">
+     <div className="flex items-center justify-center min-h-[calc(100vh-250px)] p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-5xl w-full bg-white dark:bg-slate-800 shadow-2xl rounded-3xl overflow-hidden border border-slate-200/50 dark:border-slate-700">
             {/* Left side with brand/welcome message */}
             <div className="hidden md:flex flex-col justify-center items-center p-12 bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-center">
                  <h1 className="text-4xl font-black tracking-tighter">Join Us Today!</h1>
@@ -95,12 +95,12 @@ const RegisterPage: React.FC = () => {
             {/* Right side with the form */}
             <div className="p-8 sm:p-14">
                 <div className="mb-8 text-center md:text-left">
-                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                    <h2 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                         Create Account
                     </h2>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                         Already a member?{' '}
-                        <Link to="/login" className="font-semibold text-cyan-600 hover:underline">
+                        <Link to="/login" className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">
                         Sign In
                         </Link>
                     </p>
@@ -108,15 +108,15 @@ const RegisterPage: React.FC = () => {
 
                 <form className="space-y-4" onSubmit={handleRegister}>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <input type="text" placeholder="Full Name" required value={fullName} onChange={e => setFullName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition" />
-                        <input type="date" placeholder="Date of Birth" required value={dob} onChange={e => setDob(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-500" />
+                        <input type="text" placeholder="Full Name" required value={fullName} onChange={e => setFullName(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
+                        <input type="date" placeholder="Date of Birth" required value={dob} onChange={e => setDob(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
                     </div>
-                     <input type="tel" placeholder="Mobile Number" required value={mobile} onChange={e => setMobile(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition" />
-                     <input type="email" placeholder="Email Address" required value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition" />
-                     <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition" />
-                     <input type="password" placeholder="Confirm Password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition" />
+                     <input type="tel" placeholder="Mobile Number" required value={mobile} onChange={e => setMobile(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
+                     <input type="email" placeholder="Email Address" required value={email} onChange={e => setEmail(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
+                     <input type="password" placeholder="Password" required value={password} onChange={e => setPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
+                     <input type="password" placeholder="Confirm Password" required value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100" />
                     
-                    {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg text-center border border-red-200">{error}</p>}
+                    {error && <p className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-center border border-red-200 dark:border-red-500/30">{error}</p>}
 
                     <div className="pt-4">
                         <button

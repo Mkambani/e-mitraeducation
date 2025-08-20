@@ -40,8 +40,8 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-[calc(100vh-250px)] bg-slate-50 p-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl w-full bg-white shadow-2xl rounded-3xl overflow-hidden border border-slate-200/50">
+    <div className="flex items-center justify-center min-h-[calc(100vh-250px)] p-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 max-w-4xl w-full bg-white dark:bg-slate-800 shadow-2xl rounded-3xl overflow-hidden border border-slate-200/50 dark:border-slate-700">
             {/* Left side with brand/welcome message */}
             <div className="hidden md:flex flex-col justify-center items-center p-12 bg-gradient-to-br from-cyan-500 to-blue-600 text-white text-center">
                  <h1 className="text-4xl font-black tracking-tighter">Welcome Back!</h1>
@@ -51,12 +51,12 @@ const LoginPage: React.FC = () => {
             {/* Right side with the form */}
             <div className="p-8 sm:p-14">
                 <div className="mb-8 text-center md:text-left">
-                    <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">
+                    <h2 className="text-3xl font-extrabold text-slate-900 dark:text-slate-100 tracking-tight">
                         Sign In
                     </h2>
-                    <p className="mt-2 text-sm text-slate-600">
+                    <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
                         Don't have an account?{' '}
-                        <Link to="/register" className="font-semibold text-cyan-600 hover:underline">
+                        <Link to="/register" className="font-semibold text-cyan-600 dark:text-cyan-400 hover:underline">
                         Create one now
                         </Link>
                     </p>
@@ -66,7 +66,7 @@ const LoginPage: React.FC = () => {
                     {/* Email Input */}
                     <div className="relative">
                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                         <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400 dark:text-slate-500" viewBox="0 0 20 20" fill="currentColor">
                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
                          </svg>
@@ -79,7 +79,7 @@ const LoginPage: React.FC = () => {
                          required
                          value={email}
                          onChange={(e) => setEmail(e.target.value)}
-                         className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
+                         className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100"
                          placeholder="Email Address"
                        />
                     </div>
@@ -87,7 +87,7 @@ const LoginPage: React.FC = () => {
                     {/* Password Input */}
                     <div className="relative">
                          <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-slate-400 dark:text-slate-500" viewBox="0 0 20 20" fill="currentColor">
                                <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
                             </svg>
                          </div>
@@ -99,16 +99,16 @@ const LoginPage: React.FC = () => {
                            required
                            value={password}
                            onChange={(e) => setPassword(e.target.value)}
-                           className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition"
+                           className="w-full pl-11 pr-4 py-3 bg-slate-50 dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-lg focus:ring-2 focus:ring-cyan-400 focus:border-cyan-400 transition text-slate-900 dark:text-slate-100"
                            placeholder="Password"
                          />
                     </div>
                     
                     <div className="flex items-center justify-between">
-                       <a href="#" className="text-sm font-medium text-cyan-600 hover:underline">Forgot your password?</a>
+                       <a href="#" className="text-sm font-medium text-cyan-600 dark:text-cyan-400 hover:underline">Forgot your password?</a>
                     </div>
 
-                    {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded-lg text-center border border-red-200">{error}</p>}
+                    {error && <p className="text-sm text-red-600 dark:text-red-300 bg-red-50 dark:bg-red-900/20 p-3 rounded-lg text-center border border-red-200 dark:border-red-500/30">{error}</p>}
 
                     <div>
                         <button

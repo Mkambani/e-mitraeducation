@@ -38,7 +38,7 @@ const { HashRouter, Routes, Route, Outlet } = ReactRouterDOM as any;
 const SiteLayout = () => (
   <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 font-sans">
     <Header />
-    <main className="flex-grow container mx-auto max-w-7xl px-4 py-8 mb-20 md:mb-0">
+    <main className="flex-grow container mx-auto max-w-7xl px-4 pt-8 pb-1 mb-1 md:mb-0">
       <Outlet />
     </main>
     <Footer />

@@ -1,6 +1,7 @@
 
 
 
+
 import React, { useContext, useMemo, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { getBreadcrumbs, findServiceById } from './serviceHelper';
@@ -236,10 +237,10 @@ const ServicePage: React.FC = () => {
             {hasSubServices ? (
                 <>
                     <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-3xl font-bold text-slate-700 dark:text-slate-300 tracking-tight">
+                        <h2 className="text-2xl md:text-3xl font-bold text-slate-700 dark:text-slate-300 tracking-tight">
                             {service.is_bookable ? 'Or, Choose a Specific Service' : `Services under ${service.name}`}
                         </h2>
-                         <div className="hidden md:flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg gap-1">
+                         <div className="flex-shrink-0 flex bg-slate-100 dark:bg-slate-800 p-1 rounded-lg gap-1">
                             <button
                                 onClick={() => setViewMode('grid')}
                                 aria-label="Grid View"

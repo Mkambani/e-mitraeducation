@@ -18,6 +18,7 @@ import { ThemeProvider } from './context/ThemeContext';
 import BottomNavBar from './components/BottomNavBar';
 import AllServicesPage from './pages/AllServicesPage';
 import SearchResultsPage from './pages/SearchResultsPage';
+import AboutPage from './pages/AboutPage';
 
 
 // Admin components
@@ -59,6 +60,7 @@ function App() {
                   <Route path="/" element={<HomePage />} />
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/about" element={<AboutPage />} />
                   <Route path="/service/:serviceId" element={<ServicePage />} />
                   <Route path="/services" element={<AllServicesPage />} />
                   <Route path="/search" element={<SearchResultsPage />} />

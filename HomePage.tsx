@@ -235,7 +235,7 @@ const HomePage: React.FC = () => {
         
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Testimonial 1 */}
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden">
                 <svg className="absolute top-6 right-6 w-20 h-20 text-slate-100 dark:text-slate-700/50" fill="currentColor" viewBox="0 0 32 32"><path d="M9.33,26.33a2.67,2.67,0,0,1-2.66-2.67V12a2.67,2.67,0,0,1,2.67-2.67H14.67a2.67,2.67,0,0,1,2.66,2.67v8.89a.89.89,0,0,1-.89.89H12a2.67,2.67,0,0,0-2.67,2.67Z"/><path d="M22.67,26.33a2.67,2.67,0,0,1-2.67-2.67V12a2.67,2.67,0,0,1,2.67-2.67H28a2.67,2.67,0,0,1,2.67,2.67v8.89a.89.89,0,0,1-.89.89H25.33a2.67,2.67,0,0,0-2.67,2.67Z"/></svg>
                 <div className="relative z-10 flex flex-col h-full">
                     <div className="flex items-center gap-1 text-yellow-400">
@@ -257,7 +257,7 @@ const HomePage: React.FC = () => {
             </div>
 
             {/* Testimonial 2 */}
-            <div className="bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden">
+            <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden">
                 <svg className="absolute top-6 right-6 w-20 h-20 text-slate-100 dark:text-slate-700/50" fill="currentColor" viewBox="0 0 32 32"><path d="M9.33,26.33a2.67,2.67,0,0,1-2.66-2.67V12a2.67,2.67,0,0,1,2.67-2.67H14.67a2.67,2.67,0,0,1,2.66,2.67v8.89a.89.89,0,0,1-.89.89H12a2.67,2.67,0,0,0-2.67,2.67Z"/><path d="M22.67,26.33a2.67,2.67,0,0,1-2.67-2.67V12a2.67,2.67,0,0,1,2.67-2.67H28a2.67,2.67,0,0,1,2.67,2.67v8.89a.89.89,0,0,1-.89.89H25.33a2.67,2.67,0,0,0-2.67,2.67Z"/></svg>
                 <div className="relative z-10 flex flex-col h-full">
                     <div className="flex items-center gap-1 text-yellow-400">

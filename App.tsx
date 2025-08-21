@@ -19,6 +19,8 @@ import BottomNavBar from './components/BottomNavBar';
 import AllServicesPage from './pages/AllServicesPage';
 import SearchResultsPage from './pages/SearchResultsPage';
 import AboutPage from './pages/AboutPage';
+import ContactPage from './pages/ContactPage';
+import TermsPage from './pages/TermsPage';
 
 
 // Admin components
@@ -39,7 +41,7 @@ const { HashRouter, Routes, Route, Outlet } = ReactRouterDOM as any;
 const SiteLayout = () => (
   <div className="flex flex-col min-h-screen bg-slate-50 dark:bg-slate-900 font-sans">
     <Header />
-    <main className="flex-grow container mx-auto max-w-7xl px-4 pt-8 pb-1 mb-1 md:mb-0">
+    <main className="flex-grow container mx-auto max-w-7xl px-4 pt-8 pb-24 md:pb-1">
       <Outlet />
     </main>
     <Footer />
@@ -61,6 +63,8 @@ function App() {
                   <Route path="/login" element={<LoginPage />} />
                   <Route path="/register" element={<RegisterPage />} />
                   <Route path="/about" element={<AboutPage />} />
+                  <Route path="/contact" element={<ContactPage />} />
+                  <Route path="/terms" element={<TermsPage />} />
                   <Route path="/service/:serviceId" element={<ServicePage />} />
                   <Route path="/services" element={<AllServicesPage />} />
                   <Route path="/search" element={<SearchResultsPage />} />

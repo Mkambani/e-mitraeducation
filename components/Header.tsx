@@ -102,8 +102,8 @@ const Header: React.FC = () => {
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-30 border-b border-slate-200/80 dark:border-slate-800/80">
       <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
         <Link to="/" className="flex items-center gap-2">
-           <span className="font-bold text-2xl text-slate-800 dark:text-slate-200">near</span>
-           <span className="font-bold text-2xl text-cyan-500">me.</span>
+           <span className="font-bold text-2xl text-slate-800 dark:text-slate-200">Document</span>
+           <span className="font-bold text-2xl text-cyan-500">mitra.</span>
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
           <button

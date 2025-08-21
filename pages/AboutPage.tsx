@@ -92,7 +92,7 @@ const AboutPage: React.FC = () => {
                             <div className="absolute inset-0 bg-gradient-to-tr from-slate-100 to-slate-200 dark:from-slate-800 dark:to-slate-900 rounded-[50px] transform -rotate-12 transition-transform duration-500 hover:rotate-0"></div>
                             <img
                                 src={ownerImageUrl}
-                                alt="Rohan Sharma, Founder of NearMe"
+                                alt="Rohan Sharma, Founder of Documentmitra"
                                 className="absolute inset-0 w-full h-full object-cover rounded-[40px] shadow-2xl p-2 bg-white/50 dark:bg-slate-900/50 transform rotate-6 transition-transform duration-500 hover:rotate-0"
                             />
                         </Animated>
@@ -123,7 +123,7 @@ const AboutPage: React.FC = () => {
                          <span className="inline-block px-4 py-1.5 bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 text-sm font-bold rounded-full mb-4">OUR SOLUTION</span>
                         <h2 className="text-3xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">Clarity & Simplicity</h2>
                         <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-                            NearMe was born from a simple idea: what if accessing government services could be as easy as ordering a taxi? We've created a unified, user-friendly platform that digitizes processes, provides step-by-step guidance, and puts the power back in your hands.
+                            Documentmitra was born from a simple idea: what if accessing government services could be as easy as ordering a taxi? We've created a unified, user-friendly platform that digitizes processes, provides step-by-step guidance, and puts the power back in your hands.
                         </p>
                     </div>
                 </Animated>
@@ -196,7 +196,7 @@ const AboutPage: React.FC = () => {
                 <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {[
                         { img: "https://images.pexels.com/photos/3772510/pexels-photo-3772510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", name: "Anjali Gupta", service: "Passport Renewal", quote: "I renewed my passport entirely from home! I never thought it could be this simple. The process was clear, the document upload was a breeze, and I was kept informed at every step. Absolutely fantastic service." },
-                        { img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", name: "Sameer Khan", service: "Driving License", quote: "Getting my driver's license used to be a nightmare. NearMe turned it into a straightforward digital process. I saved so much time and avoided all the usual bureaucratic headaches. Highly recommended!" },
+                        { img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", name: "Sameer Khan", service: "Driving License", quote: "Getting my driver's license used to be a nightmare. Documentmitra turned it into a straightforward digital process. I saved so much time and avoided all the usual bureaucratic headaches. Highly recommended!" },
                     ].map((testimonial, i) => (
                         <Animated key={testimonial.name} delay={i * 100}>
                             <div className="h-full bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 flex flex-col">

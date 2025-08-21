@@ -1,6 +1,6 @@
 {
-  "name": "card of service of GovServices NearMe",
-  "description": "A web application to streamline the process of finding and booking various government services, featuring an AI assistant to help users navigate the available options. Users can navigate through service categories, view required documents, upload them, and proceed to payment in a seamless, user-friendly flow.",
+  "name": "Documentmitra - Your Government Service Assistant",
+  "description": "An application to streamline finding and booking government services. Our AI assistant helps you navigate options, manage documents, and handle payments seamlessly.",
   "requestFramePermissions": [],
   "prompt": ""
 }

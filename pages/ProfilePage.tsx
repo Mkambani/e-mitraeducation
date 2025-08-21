@@ -1,4 +1,5 @@
 
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../supabaseClient';
@@ -220,7 +221,7 @@ export const ProfilePage: React.FC = () => {
                                 Booked on: {new Date(booking.created_at).toLocaleDateString()}
                             </p>
                             <p className="text-sm text-slate-500 dark:text-slate-400 font-mono">
-                                ID: NME-{String(booking.id).padStart(6, '0')}
+                                ID: DMTRA-{String(booking.id).padStart(6, '0')}
                             </p>
                         </div>
                         <div className="flex-shrink-0 mt-3 sm:mt-0 text-right">

@@ -266,7 +266,7 @@ const HomePage: React.FC = () => {
                         ))}
                     </div>
                     <p className="mt-4 text-slate-600 dark:text-slate-300 flex-grow text-lg leading-relaxed">
-                        "Getting my driver's license used to be a nightmare. NearMe turned it into a straightforward digital process. I saved so much time and avoided all the usual bureaucratic headaches. Highly recommended!"
+                        "Getting my driver's license used to be a nightmare. Documentmitra turned it into a straightforward digital process. I saved so much time and avoided all the usual bureaucratic headaches. Highly recommended!"
                     </p>
                     <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-4">
                         <img className="w-14 h-14 rounded-full object-cover" src="https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1" alt="Sameer Khan" />

@@ -113,8 +113,8 @@ const AdminLayout: React.FC = () => {
             {/* Sidebar */}
             <aside className={`w-64 flex-shrink-0 bg-admin-sidebar-bg h-screen fixed top-0 left-0 flex flex-col p-4 z-40 transition-transform duration-300 ease-in-out md:translate-x-0 ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
                 <Link to="/admin" className="flex items-center gap-2 px-2 pb-4 mb-4 border-b border-white/10">
-                   <span className="font-bold text-2xl text-admin-sidebar-heading">near</span>
-                   <span className="font-bold text-2xl text-admin-sidebar-icon">me.</span>
+                   <span className="font-bold text-2xl text-admin-sidebar-heading">Document</span>
+                   <span className="font-bold text-2xl text-admin-sidebar-icon">mitra.</span>
                 </Link>
 
                 <div className="relative mb-4">

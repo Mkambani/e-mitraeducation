@@ -305,7 +305,7 @@ BEGIN
 
   -- Insert default payment gateways
   INSERT INTO public.payment_gateways (key, name, icon_name, is_active, display_order, config) VALUES
-  ('razorpay', 'Card, UPI, Netbanking', 'RazorpayIcon', true, 10, '{"key_id": "YOUR_RAZORPAY_KEY_ID", "description": "Pay with all major cards, UPI, and wallets."}'),
+  ('razorpay', 'Razorpay', 'RazorpayIcon', true, 10, '{"key_id": "YOUR_RAZORPAY_KEY_ID", "key_secret": "YOUR_RAZORPAY_KEY_SECRET", "description": "Pay securely with Razorpay."}'),
   ('cod', 'Cash on Delivery', 'CashIcon', true, 20, '{"description": "Pay at the time of service completion."}');
 
 END $$;

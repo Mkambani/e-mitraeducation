@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { supabase } from '../../supabaseClient';
 import { PaymentGateway } from '../../types';
 import IconMap from '../../components/IconMap';
 import { Json } from '../../database.types';
+import { ServiceContext } from '../../context/ServiceContext';
 
 const AdminPaymentGatewaysPage: React.FC = () => {
     const [gateways, setGateways] = useState<PaymentGateway[]>([]);
@@ -10,6 +11,7 @@ const AdminPaymentGatewaysPage: React.FC = () => {
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const { refetchServices } = useContext(ServiceContext);
 
     const fetchGateways = useCallback(async () => {
         setLoading(true);
@@ -69,11 +71,13 @@ const AdminPaymentGatewaysPage: React.FC = () => {
 
             if (error) throw error;
             setSuccess('Payment gateway settings saved successfully!');
-            fetchGateways(); // Refetch to sync state
+            fetchGateways(); // Refetch to sync local state on this page
+            refetchServices(); // Refetch global context for the entire app
         } catch (err: any) {
             setError(`Failed to save settings: ${err.message}`);
         } finally {
             setSaving(false);
+            setTimeout(() => setSuccess(''), 3000);
         }
     }
 
@@ -128,15 +132,27 @@ const AdminPaymentGatewaysPage: React.FC = () => {
                             {/* Right: Configuration */}
                             <div className="md:col-span-2 space-y-3">
                                 {gw.key === 'razorpay' && (
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-semibold text-admin-light">Razorpay Key ID</label>
-                                        <input 
-                                            type="text" 
-                                            placeholder="rzp_live_..."
-                                            value={gw.config?.key_id || ''}
-                                            onChange={e => handleConfigChange(gw.id, 'key_id', e.target.value)}
-                                            className="w-full p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
-                                        />
+                                    <div className="space-y-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-admin-light">Razorpay Key ID</label>
+                                            <input 
+                                                type="text" 
+                                                placeholder="rzp_live_..."
+                                                value={gw.config?.key_id || ''}
+                                                onChange={e => handleConfigChange(gw.id, 'key_id', e.target.value)}
+                                                className="w-full p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-semibold text-admin-light">Razorpay Key Secret</label>
+                                            <input 
+                                                type="password" 
+                                                placeholder="Your secret key"
+                                                value={gw.config?.key_secret || ''}
+                                                onChange={e => handleConfigChange(gw.id, 'key_secret', e.target.value)}
+                                                className="w-full p-2 bg-admin-main-bg text-admin-heading border border-admin-card-border rounded-lg focus:ring-1 focus:ring-admin-accent focus:border-admin-accent transition"
+                                            />
+                                        </div>
                                     </div>
                                 )}
                                 <div className="space-y-2">

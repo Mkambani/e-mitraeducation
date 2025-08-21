@@ -1,4 +1,3 @@
-
 import React, { useContext, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { supabase } from './supabaseClient';
@@ -9,6 +8,12 @@ import { Database } from './database.types';
 
 const { useLocation, useNavigate } = ReactRouterDOM as any;
 
+declare global {
+    interface Window {
+        Razorpay: any;
+    }
+}
+
 const PaymentPage: React.FC = () => {
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -17,38 +22,114 @@ const PaymentPage: React.FC = () => {
 
     const { serviceName, bookingId, price } = state || {};
 
-    const [selectedGateway, setSelectedGateway] = useState<string | null>(null);
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     const handlePayment = async (gatewayKey: string) => {
-        setSelectedGateway(gatewayKey);
         setProcessing(true);
         setError(null);
-
-        // Simulate API call to payment gateway
-        await new Promise(resolve => setTimeout(resolve, 1500));
-
-        try {
-            const updatePayload = { 
-                status: 'Pending', 
-                payment_method: gatewayKey,
-                payment_id: `${gatewayKey}_${Date.now()}`
-            };
-            const { error: updateError } = await supabase
-                .from('bookings')
-                .update(updatePayload)
-                .eq('id', bookingId);
-
-            if (updateError) throw updateError;
-            
-            navigate('/booking-confirmed', { state: { serviceName, bookingId, price } });
-
-        } catch (err: any) {
-            setError('Failed to update booking after payment. Please contact support.');
-            console.error(err);
-        } finally {
+        
+        const gateway = availableGateways.find(g => g.key === gatewayKey);
+        if (!gateway) {
+            setError("Selected payment gateway is not available.");
             setProcessing(false);
+            return;
+        }
+
+        // --- Razorpay Integration ---
+        if (gateway.key === 'razorpay') {
+            if (!window.Razorpay) {
+                setError("Razorpay SDK could not be loaded. Please check your connection and try again.");
+                setProcessing(false);
+                return;
+            }
+
+            const razorpayKeyId = gateway.config?.key_id;
+            if (!razorpayKeyId || String(razorpayKeyId).includes('YOUR_RAZORPAY_KEY_ID')) {
+                setError("Razorpay is not configured correctly. Please contact support.");
+                setProcessing(false);
+                return;
+            }
+
+            const options = {
+                key: razorpayKeyId,
+                amount: price * 100, // amount in the smallest currency unit
+                currency: "INR",
+                name: "Documentmitra",
+                description: `Payment for ${serviceName}`,
+                handler: async function (response: any) {
+                    try {
+                        const updatePayload = { 
+                            status: 'Pending', 
+                            payment_method: gateway.key,
+                            payment_id: response.razorpay_payment_id
+                        };
+                        const { error: updateError } = await supabase
+                            .from('bookings')
+                            .update(updatePayload)
+                            .eq('id', bookingId);
+                        if (updateError) throw updateError;
+                        
+                        navigate('/booking-confirmed', { state: { serviceName, bookingId, price } });
+                    } catch (err: any) {
+                         setError('Payment was successful, but failed to update booking. Please contact support with your Payment ID.');
+                         console.error(err);
+                    } finally {
+                        setProcessing(false);
+                    }
+                },
+                prefill: {
+                    name: profile?.full_name || "",
+                    email: profile?.email || "",
+                    contact: profile?.mobile_number || ""
+                },
+                theme: {
+                    color: "#06b6d4" // cyan-500
+                },
+                modal: {
+                    ondismiss: function() {
+                        setProcessing(false); // User closed the modal
+                    }
+                }
+            };
+
+            const rzp1 = new window.Razorpay(options);
+            rzp1.on('payment.failed', function (response: any){
+                setError(`Payment Failed: ${response.error.description}`);
+                console.error(response.error);
+                setProcessing(false);
+            });
+            rzp1.open();
+            
+            return; // Exit here, Razorpay handler will navigate
+        }
+
+        // --- Existing COD logic ---
+        if (gateway.key === 'cod') {
+            // Simulate API call for COD
+            await new Promise(resolve => setTimeout(resolve, 1500));
+
+            try {
+                const updatePayload = { 
+                    status: 'Pending', 
+                    payment_method: gateway.key,
+                    payment_id: `cod_${Date.now()}`
+                };
+                const { error: updateError } = await supabase
+                    .from('bookings')
+                    .update(updatePayload)
+                    .eq('id', bookingId);
+
+                if (updateError) throw updateError;
+                
+                navigate('/booking-confirmed', { state: { serviceName, bookingId, price } });
+
+            } catch (err: any) {
+                setError('Failed to update booking after payment. Please contact support.');
+                console.error(err);
+            } finally {
+                setProcessing(false);
+            }
         }
     };
     
@@ -102,7 +183,7 @@ const PaymentPage: React.FC = () => {
                                     {gateway.config?.description && <p className="text-sm text-slate-500 dark:text-slate-400">{gateway.config.description}</p>}
                                 </div>
                                 <div className="ml-auto">
-                                    {processing && selectedGateway === gateway.key ? (
+                                    {processing ? (
                                         <div className="animate-spin rounded-full h-6 w-6 border-t-2 border-b-2 border-cyan-500"></div>
                                     ) : (
                                         <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" /></svg>

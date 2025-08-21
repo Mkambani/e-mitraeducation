@@ -30,7 +30,7 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ slides }) => {
   if (!slide) return null;
 
   return (
-    <div className="relative rounded-2xl overflow-hidden shadow-lg h-56 my-8 text-white flex items-center p-6 md:p-8 group">
+    <div className="relative rounded-2xl overflow-hidden shadow-lg h-56 my-8 text-white flex items-center p-4 sm:p-6 md:p-8 group">
       {/* Animated Gradient Background */}
       <div className="absolute inset-0 transition-all duration-1000 ease-in-out">
         <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-700 animate-[gradient-animation_15s_ease_infinite]"></div>
@@ -53,8 +53,8 @@ const PromoBanner: React.FC<PromoBannerProps> = ({ slides }) => {
       
       {/* Content */}
       <div className="relative z-10">
-        <h2 className="text-3xl md:text-4xl font-black tracking-tighter drop-shadow-md">{slide.title}</h2>
-        <p className="text-lg md:text-xl font-semibold mt-1 opacity-90 drop-shadow-sm">{slide.subtitle}</p>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl font-black tracking-tighter drop-shadow-md">{slide.title}</h2>
+        <p className="text-md sm:text-lg md:text-xl font-semibold mt-1 opacity-90 drop-shadow-sm">{slide.subtitle}</p>
         <div className="mt-5 bg-black/20 backdrop-blur-sm inline-block px-5 py-2 rounded-full border border-white/20">
           <p className="text-sm font-bold tracking-widest">{slide.code}</p>
         </div>

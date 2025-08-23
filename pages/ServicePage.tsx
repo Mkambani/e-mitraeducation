@@ -1,11 +1,11 @@
 import React, { useContext, useMemo, useState, useEffect } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { getBreadcrumbs, findServiceById } from './serviceHelper';
-import Breadcrumb from './components/Breadcrumb';
-import IconMap from './components/IconMap';
-import { Service, Review } from './types';
-import { ServiceContext } from './context/ServiceContext';
-import { supabase } from './supabaseClient';
+import { getBreadcrumbs, findServiceById } from '../serviceHelper';
+import Breadcrumb from '../components/Breadcrumb';
+import IconMap from '../components/IconMap';
+import { Service, Review } from '../types';
+import { ServiceContext } from '../context/ServiceContext';
+import { supabase } from '../supabaseClient';
 
 const { useParams, useNavigate, Link } = ReactRouterDOM as any;
 
@@ -306,7 +306,7 @@ const ServicePage: React.FC = () => {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start">
         
         {/* Left Panel: Parent Service Info */}
-        <aside className="lg:col-span-6 xl:col-span-6">
+        <aside className="lg:col-span-4 xl:col-span-3">
             <div className="sticky top-28 animate-slide-in-left">
                 <div className="p-6 bg-gradient-to-br from-white to-slate-50 dark:from-slate-800 dark:to-slate-900/70 rounded-3xl shadow-2xl shadow-slate-200/50 dark:shadow-black/20 border border-slate-200/50 dark:border-slate-700/50">
                     <div className="relative mb-4">
@@ -373,7 +373,7 @@ const ServicePage: React.FC = () => {
         </aside>
 
         {/* Right Panel: Sub-Services */}
-        <div className="lg:col-span-6 xl:col-span-6">
+        <div className="lg:col-span-8 xl:col-span-9">
             {hasSubServices ? (
                 <>
                     <div className="flex justify-between items-center mb-6">
@@ -399,7 +399,7 @@ const ServicePage: React.FC = () => {
                     </div>
 
                     {viewMode === 'grid' ? (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-6">
                             {service.subServices?.map((sub) => (
                                <SubServiceCard 
                                     key={sub.id} 

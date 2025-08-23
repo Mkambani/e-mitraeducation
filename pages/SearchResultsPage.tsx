@@ -1,7 +1,7 @@
 
+
 import React, { useState, useEffect, useContext } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
-import { GoogleGenAI, Type } from '@google/genai';
 import { ServiceContext } from '../context/ServiceContext';
 import { flattenServices } from '../serviceHelper';
 import { Service } from '../types';
@@ -22,57 +22,23 @@ const SearchResultsPage: React.FC = () => {
     const flatServiceList = React.useMemo(() => flattenServices(allServices), [allServices]);
 
     useEffect(() => {
-        const performSearch = async () => {
-            if (!query || servicesLoading) return;
-            setLoading(true);
-            setSearchResults([]);
-
-            try {
-                const ai = new GoogleGenAI({ apiKey: process.env.API_KEY as string });
-                const serviceContext = JSON.stringify(flatServiceList.map(s => ({ id: s.id, name: s.name, description: s.description, is_bookable: s.is_bookable, price: s.price, icon_name: s.icon_name })));
-
-                const prompt = `You are a search engine for a government services website. You must find all services from the provided JSON list that are relevant to the user's query.
-                User Query: "${query}"
-                Available Services (JSON): ${serviceContext}
-                Return a JSON array of all matching service objects. Each object must be a complete service object from the provided list, including 'id', 'name', 'is_bookable', 'price', and 'icon_name'. If no services match, return an empty array.`;
-
-                const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
-                    contents: prompt,
-                    config: {
-                        responseMimeType: "application/json",
-                        responseSchema: {
-                            type: Type.ARRAY,
-                            items: {
-                                type: Type.OBJECT,
-                                properties: {
-                                    id: { type: Type.INTEGER },
-                                    name: { type: Type.STRING },
-                                    is_bookable: { type: Type.BOOLEAN },
-                                    price: { type: Type.NUMBER, nullable: true },
-                                    icon_name: { type: Type.STRING },
-                                },
-                                required: ["id", "name", "is_bookable", "icon_name"]
-                            }
-                        }
-                    }
-                });
-
-                const resultText = response.text.trim();
-                const resultJson = JSON.parse(resultText) as Service[];
-                setSearchResults(resultJson);
-            } catch (error) {
-                console.error("AI search error:", error);
-                setSearchResults([]);
-            } finally {
-                setLoading(false);
-            }
-        };
-        
-        if(!servicesLoading) {
-           performSearch();
+        if (!query || servicesLoading) {
+            setLoading(servicesLoading);
+            return;
         }
+        setLoading(true);
+
+        const lowerCaseQuery = query.toLowerCase();
+        const results = flatServiceList.filter(service => 
+            service.name.toLowerCase().includes(lowerCaseQuery) ||
+            (service.description && service.description.toLowerCase().includes(lowerCaseQuery))
+        );
+
+        setSearchResults(results);
+        setLoading(false);
+
     }, [query, servicesLoading, flatServiceList]);
+
 
     const handleServiceClick = (service: Service) => {
         if (service.is_bookable) {
@@ -90,7 +56,7 @@ const SearchResultsPage: React.FC = () => {
           </h1>
         </div>
 
-        {loading || servicesLoading ? (
+        {loading ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-5">
             {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="flex flex-col items-center gap-3 p-4 rounded-2xl bg-slate-100 dark:bg-slate-800 animate-pulse">

@@ -1,17 +1,16 @@
 
 
+
 import React, { useState, useContext, useMemo } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { findServiceById, getBreadcrumbs } from './serviceHelper';
 import Breadcrumb from './components/Breadcrumb';
-import DocumentUploader, { UploadedFileRecord } from './components/DocumentUploader';
+import DocumentUploader from './components/DocumentUploader';
 import { ServiceContext } from './context/ServiceContext';
 import { useAuth } from './context/AuthContext';
-import { supabase } from './supabaseClient';
-import { FormField, Booking } from './types';
-import { Json, Database } from './database.types';
+import { FormField } from './types';
 
-const { useParams, Link, useNavigate } = ReactRouterDOM as any;
+const { useParams, Link } = ReactRouterDOM as any;
 
 // Dynamic Form Component, now lives inside BookingPage
 const DynamicUserDetailsForm: React.FC<{
@@ -72,9 +71,7 @@ const BookingPage: React.FC = () => {
   const [userDetails, setUserDetails] = useState<Record<string, any> | null>(null);
   
   const params = useParams();
-  const navigate = useNavigate();
   const { allServices, loading: servicesLoading } = useContext(ServiceContext);
-  const { user } = useAuth();
   
   const serviceId = Number(params.serviceId);
 
@@ -92,48 +89,6 @@ const BookingPage: React.FC = () => {
     setCurrentStep(2);
   };
 
-  const handleDocumentsSubmit = async (files: UploadedFileRecord) => {
-    if (!user || !service || !userDetails) return;
-    
-    const isFreeService = finalPrice === 0;
-    
-    try {
-        const newBookingPayload: Database['public']['Tables']['bookings']['Insert'] = {
-            user_id: user.id,
-            service_id: service.id,
-            status: isFreeService ? 'Pending' : 'Awaiting Payment',
-            user_details: userDetails as unknown as Json,
-            uploaded_files: files as unknown as Json,
-            payment_method: isFreeService ? 'N/A (Free)' : null,
-            final_price: finalPrice,
-            payment_id: null,
-        };
-
-        const { data, error } = await supabase.from('bookings').insert(newBookingPayload).select().single();
-
-        if (error) throw error;
-        
-        const bookingId = (data as any).id;
-        
-        // --- SIMULATED NOTIFICATION ---
-        console.log(`[SIMULATION] SMS/WhatsApp notification sent to owner for booking #${bookingId}.`);
-        // In a real app, you would call your notification service here, e.g.:
-        // await sendTwilioNotification(adminPhoneNumber, `New booking #${bookingId} for ${service.name}.`);
-
-
-        if (isFreeService) {
-             navigate('/booking-confirmed', { state: { serviceName: service.name, bookingId, price: finalPrice } });
-        } else {
-             navigate('/payment', { state: { serviceName: service.name, bookingId, price: finalPrice } });
-        }
-
-    } catch(err) {
-        console.error("Failed to create booking:", err);
-        alert("There was an error creating your booking. Please try again.");
-    }
-  };
-
-
   if (servicesLoading) {
     return <div className="text-center p-10">Loading...</div>;
   }
@@ -148,7 +103,7 @@ const BookingPage: React.FC = () => {
     );
   }
   
-  const stepLabel = finalPrice === 0 ? 'Complete Booking' : 'Proceed to Payment';
+  const buttonLabel = finalPrice === 0 ? 'Complete Booking' : 'Proceed to Payment';
 
   return (
     <div>
@@ -165,7 +120,7 @@ const BookingPage: React.FC = () => {
            )}
           <p className="text-slate-500 dark:text-slate-400 mt-2 max-w-2xl mx-auto">
              {currentStep === 2
-              ? `Step 2: Please upload the required documents to ${stepLabel.toLowerCase()}.`
+              ? `Step 2: Please upload the required documents to ${buttonLabel.toLowerCase()}.`
               : `Step 1: Please fill in the applicant's details below.`}
           </p>
         </div>
@@ -177,11 +132,11 @@ const BookingPage: React.FC = () => {
             />
         )}
 
-        {currentStep === 2 && (
+        {currentStep === 2 && userDetails && (
           <DocumentUploader 
             documentRequirements={service.booking_config.document_requirements} 
-            serviceId={service.id}
-            onDocumentsSubmit={handleDocumentsSubmit} 
+            service={service}
+            userDetails={userDetails}
           />
         )}
       </div>

@@ -1,0 +1,118 @@
+# Supabase Storage Bucket Setup Guide
+
+## 1. Why is this file important?
+
+**CRITICAL:** This is the most important **manual step** you must perform when setting up a new Supabase project. The main SQL script (`SETUP.md`) cannot create Storage Buckets for you. If you skip this step, your application **will fail** whenever a user tries to upload a file (e.g., documents for a booking, a profile picture, or when an admin uploads a service icon).
+
+This guide provides clear, step-by-step instructions to create and configure the necessary buckets correctly.
+
+---
+
+## 2. What are Storage Buckets?
+
+Storage Buckets are like folders on a cloud drive where your application stores files. Our application uses them for:
+- **`documents`**: Storing files uploaded by users for their service bookings (e.g., ID proofs, address proofs) and files uploaded by admins as proof of completion.
+- **`service-icons`**: Storing icons for each service category.
+- **`avatars`**: Storing user profile pictures.
+- **`promo-banners`**: Storing images for the promotional carousel on the homepage.
+- **`notification-sounds`**: Storing custom audio files for application notifications.
+
+---
+
+## 3. Step-by-Step Setup Instructions
+
+You need to create **FIVE** buckets. Follow these instructions precisely for each one.
+
+**Instructions:**
+
+1.  **Navigate to your Supabase Project Dashboard.**
+2.  In the left sidebar, click on the **Storage** icon (it looks like a bucket).
+3.  Click the **"Create bucket"** button.
+4.  A form will appear. Fill it out as described below for each bucket.
+
+---
+
+### Bucket 1: `documents`
+
+-   **Bucket name:** `documents` (use this exact name, all lowercase)
+-   **Public bucket:** Toggle this **ON** (make it green).
+
+    *Why public?* Although it sounds insecure, this is necessary for the app to generate temporary, secure links (signed URLs) for users to view their own uploaded files. The actual security is handled by Row Level Security (RLS) policies, which we'll cover below.
+
+-   Click **"Create bucket"**.
+
+### Bucket 2: `service-icons`
+
+-   **Bucket name:** `service-icons` (exact name, all lowercase)
+-   **Public bucket:** Toggle this **ON**.
+
+    *Why public?* Icons need to be publicly accessible so the website can display them quickly without needing special permissions for every user.
+
+-   Click **"Create bucket"**.
+
+### Bucket 3: `avatars`
+
+-   **Bucket name:** `avatars` (exact name, all lowercase)
+-   **Public bucket:** Toggle this **ON**.
+
+    *Why public?* User profile pictures need to be easily displayed throughout the application.
+
+-   Click **"Create bucket"**.
+
+### Bucket 4: `promo-banners`
+
+-   **Bucket name:** `promo-banners` (exact name, all lowercase)
+-   **Public bucket:** Toggle this **ON**.
+
+    *Why public?* Promotional images on the homepage need to be loaded by all visitors.
+
+-   Click **"Create bucket"**.
+
+### Bucket 5: `notification-sounds`
+
+-   **Bucket name:** `notification-sounds` (exact name, all lowercase)
+-   **Public bucket:** Toggle this **ON**.
+
+    *Why public?* Notification sounds need to be publicly accessible for the application to play them for any user or admin.
+
+-   Click **"Create bucket"**.
+
+---
+
+## 4. Understanding Security (RLS Policies)
+
+You might be concerned about making buckets "public". Here's why it's secure in our setup:
+
+The main SQL script in `SETUP.md` creates **Row Level Security (RLS) policies** on the `storage.objects` table. These are like firewall rules for your files.
+
+Here’s what they do:
+
+-   **`documents` bucket:**
+    -   A user can **ONLY** upload files into a folder named with their own User ID (e.g., `user-id-123/...`). They cannot upload files into another user's folder.
+    -   A user can **ONLY** view or download files from their own folder.
+    -   An **admin** can view, upload, and manage files in *any* user's folder.
+
+-   **`avatars` bucket:**
+    -   A user can **ONLY** upload, update, or delete an avatar within their own User ID folder.
+
+-   **`service-icons`, `promo-banners`, & `notification-sounds` buckets:**
+    -   **ANYONE** can view these files (public read access).
+    -   **ONLY** an admin can upload, update, or delete files in these buckets.
+
+This combination of "Public Buckets" (for accessibility) and "RLS Policies" (for security) gives us the perfect balance of functionality and data protection.
+
+---
+
+## 5. Troubleshooting
+
+-   **Error: "Bucket not found"**
+    -   **Cause:** You either missed creating a bucket or there is a typo in the bucket name.
+    -   **Solution:** Go back to the Storage section and ensure all five buckets (`documents`, `service-icons`, `avatars`, `promo-banners`, `notification-sounds`) exist and are named correctly.
+
+-   **Error: "Access Denied", "Forbidden", or HTTP 403 when uploading/viewing**
+    -   **Cause 1:** The bucket was not set to "Public bucket".
+    -   **Solution 1:** Go to the bucket's settings and enable the "Public bucket" toggle.
+    -   **Cause 2:** The RLS policies from the `SETUP.md` script were not run or failed to apply.
+    -   **Solution 2:** Re-run the entire SQL script from `SETUP.md` in your Supabase SQL Editor. Pay close attention to any errors reported at the bottom of the editor.
+
+After completing these steps, your application's file storage system will be fully operational.

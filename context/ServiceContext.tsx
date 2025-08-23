@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useEffect, useCallback } from 'react';
 import { supabase } from '../supabaseClient';
 import { Service, AppSettings, PromoBannerSlide, PaymentGateway, BookingConfig } from '../types';
@@ -14,10 +13,29 @@ interface ServiceContextType {
   refetchServices: () => void;
 }
 
+const defaultSettings: AppSettings = {
+    homepage_service_limit: 8,
+    website_name: "Documentmitra",
+    website_description: "Your Government Service Assistant",
+    logo_url: "",
+    favicon_url: "",
+    favicon_text: "DM",
+    contact_address: "123 Gov Services Ln, New Delhi, 110001",
+    contact_email: "support@documentmitra.gov",
+    contact_phone: "+91 1800 123 4567",
+    social_facebook: "",
+    social_twitter: "",
+    social_linkedin: "",
+    max_document_upload_size_mb: 5,
+    document_retention_days: 0,
+    admin_booking_notification_sound: "",
+    user_notification_sound: "",
+};
+
 export const ServiceContext = createContext<ServiceContextType>({
   allServices: [],
   featuredServices: [],
-  settings: { homepage_service_limit: 8 },
+  settings: defaultSettings,
   promoBanners: [],
   paymentGateways: [],
   loading: true,
@@ -32,7 +50,7 @@ const buildServiceTree = (flatServices: Database['public']['Tables']['services']
 
   flatServices.forEach(dbService => {
     const service: Service = { 
-        ...dbService, 
+        ...(dbService as any), 
         booking_config: dbService.booking_config as unknown as BookingConfig | null,
         subServices: [] 
     };
@@ -55,7 +73,7 @@ const buildServiceTree = (flatServices: Database['public']['Tables']['services']
 export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [allServices, setAllServices] = useState<Service[]>([]);
   const [featuredServices, setFeaturedServices] = useState<Service[]>([]);
-  const [settings, setSettings] = useState<AppSettings>({ homepage_service_limit: 8 });
+  const [settings, setSettings] = useState<AppSettings>(defaultSettings);
   const [promoBanners, setPromoBanners] = useState<PromoBannerSlide[]>([]);
   const [paymentGateways, setPaymentGateways] = useState<PaymentGateway[]>([]);
   const [loading, setLoading] = useState(true);
@@ -95,14 +113,14 @@ export const ServiceProvider: React.FC<{ children: React.ReactNode }> = ({ child
         const tree = buildServiceTree(flatServices);
         setAllServices(tree);
         
-        const appSettings = ((settingsRes.data as any)?.value as AppSettings) || { homepage_service_limit: 8 };
-        setSettings(appSettings);
+        const appSettings = ((settingsRes.data as any)?.value as AppSettings) || defaultSettings;
+        setSettings({...defaultSettings, ...appSettings});
 
         const featured = (flatServices || [])
             .filter(s => s.is_featured && !s.parent_id)
             .slice(0, appSettings.homepage_service_limit)
             .map(s => ({ 
-                ...s, 
+                ...(s as any), 
                 booking_config: s.booking_config as unknown as BookingConfig | null,
                 subServices: [] 
             } as Service));

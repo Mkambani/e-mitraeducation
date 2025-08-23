@@ -4,9 +4,10 @@ import { supabase } from './supabaseClient';
 import { useAuth } from './context/AuthContext';
 import { ServiceContext } from './context/ServiceContext';
 import IconMap from './components/IconMap';
-import { Database } from './database.types';
+import { Json, Database } from './database.types';
+import { UploadedFileRecord } from './components/DocumentUploader';
 
-const { useLocation, useNavigate } = ReactRouterDOM as any;
+const { useLocation, useNavigate, Link } = ReactRouterDOM as any;
 
 declare global {
     interface Window {
@@ -17,15 +18,71 @@ declare global {
 const PaymentPage: React.FC = () => {
     const { state } = useLocation();
     const navigate = useNavigate();
-    const { profile } = useAuth();
+    const { profile, user } = useAuth();
     const { paymentGateways, loading: gatewaysLoading } = useContext(ServiceContext);
 
-    const { serviceName, bookingId, price } = state || {};
+    const { serviceName, serviceId, price, userDetails, filesToUpload } = state || {};
 
     const [processing, setProcessing] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
+    const uploadFilesAndCreateBooking = async (paymentMethod: string, paymentId: string): Promise<void> => {
+        if (!user || !filesToUpload) {
+            throw new Error("Missing user or file data for booking creation.");
+        }
+        
+        // 1. Upload files to Supabase Storage
+        const finalFiles: UploadedFileRecord = {};
+        const uploadPromises = Object.entries(filesToUpload as Record<string, File>).map(async ([docId, file]) => {
+            const fileExt = file.name.split('.').pop();
+            const fileName = `${docId}-${Date.now()}.${fileExt}`;
+            const filePath = `${user.id}/${serviceId}/${fileName}`;
+            
+            const { error: uploadError } = await supabase.storage.from('documents').upload(filePath, file);
+
+            if (uploadError) {
+                throw new Error(`Upload failed for ${file.name}: ${uploadError.message}`);
+            }
+            
+            finalFiles[docId] = {
+                name: file.name,
+                path: filePath,
+                size: file.size
+            };
+        });
+
+        await Promise.all(uploadPromises);
+
+        // 2. Create booking record in the database
+        const newBookingPayload: Database['public']['Tables']['bookings']['Insert'] = {
+            user_id: user.id,
+            service_id: serviceId,
+            status: 'Pending',
+            user_details: userDetails as unknown as Json,
+            uploaded_files: finalFiles as unknown as Json,
+            payment_method: paymentMethod,
+            payment_id: paymentId,
+            final_price: price,
+        };
+        const { data, error: insertError } = await supabase
+            .from('bookings')
+            .insert(newBookingPayload)
+            .select()
+            .single();
+        
+        if (insertError) throw insertError;
+        
+        // 3. Navigate to confirmation page
+        const newBookingId = (data as any).id;
+        navigate('/booking-confirmed', { state: { serviceName, bookingId: newBookingId, price } });
+    };
+
+
     const handlePayment = async (gatewayKey: string) => {
+        if (!user) {
+            setError("User not found. Please log in again.");
+            return;
+        }
         setProcessing(true);
         setError(null);
         
@@ -59,20 +116,9 @@ const PaymentPage: React.FC = () => {
                 description: `Payment for ${serviceName}`,
                 handler: async function (response: any) {
                     try {
-                        const updatePayload = { 
-                            status: 'Pending', 
-                            payment_method: gateway.key,
-                            payment_id: response.razorpay_payment_id
-                        };
-                        const { error: updateError } = await supabase
-                            .from('bookings')
-                            .update(updatePayload)
-                            .eq('id', bookingId);
-                        if (updateError) throw updateError;
-                        
-                        navigate('/booking-confirmed', { state: { serviceName, bookingId, price } });
+                        await uploadFilesAndCreateBooking(gateway.key, response.razorpay_payment_id);
                     } catch (err: any) {
-                         setError('Payment was successful, but failed to update booking. Please contact support with your Payment ID.');
+                         setError('Payment was successful, but failed to create booking. Please contact support with your Payment ID.');
                          console.error(err);
                     } finally {
                         setProcessing(false);
@@ -94,10 +140,15 @@ const PaymentPage: React.FC = () => {
             };
 
             const rzp1 = new window.Razorpay(options);
-            rzp1.on('payment.failed', function (response: any){
-                setError(`Payment Failed: ${response.error.description}`);
-                console.error(response.error);
-                setProcessing(false);
+            rzp1.on('payment.failed', async function (response: any) {
+                const reason = response?.error?.description || 'The payment was cancelled or failed by the user.';
+                console.error("Razorpay payment failed:", response?.error);
+            
+                // Do not create a booking record. Navigate to a failure page with state to allow retry.
+                navigate('/payment-failed', { 
+                    state: { ...state, reason },
+                    replace: true 
+                });
             });
             rzp1.open();
             
@@ -110,22 +161,9 @@ const PaymentPage: React.FC = () => {
             await new Promise(resolve => setTimeout(resolve, 1500));
 
             try {
-                const updatePayload = { 
-                    status: 'Pending', 
-                    payment_method: gateway.key,
-                    payment_id: `cod_${Date.now()}`
-                };
-                const { error: updateError } = await supabase
-                    .from('bookings')
-                    .update(updatePayload)
-                    .eq('id', bookingId);
-
-                if (updateError) throw updateError;
-                
-                navigate('/booking-confirmed', { state: { serviceName, bookingId, price } });
-
+                await uploadFilesAndCreateBooking(gateway.key, `cod_${Date.now()}`);
             } catch (err: any) {
-                setError('Failed to update booking after payment. Please contact support.');
+                setError('Failed to create booking. Please contact support.');
                 console.error(err);
             } finally {
                 setProcessing(false);
@@ -141,11 +179,12 @@ const PaymentPage: React.FC = () => {
         return true;
     });
 
-    if (!bookingId || price == null) {
+    if (!serviceId || price == null || !userDetails || !filesToUpload) {
         return (
             <div className="text-center p-10">
                 <h2 className="text-2xl font-bold">Invalid Payment State</h2>
                 <p>No booking details found. Please start the booking process again.</p>
+                 <Link to="/" className="mt-6 inline-block px-6 py-2 text-white bg-cyan-500 rounded-lg hover:bg-cyan-600">Go to Homepage</Link>
             </div>
         );
     }

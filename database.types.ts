@@ -12,11 +12,14 @@ export interface Database {
       bookings: {
         Row: {
           admin_notes: Json | null
+          completed_at: string | null
           created_at: string
           final_price: number | null
           id: number
           payment_id: string | null
           payment_method: string | null
+          proof_of_completion_files: Json | null
+          review_submitted: boolean
           service_id: number | null
           status: string
           uploaded_files: Json | null
@@ -26,11 +29,14 @@ export interface Database {
         }
         Insert: {
           admin_notes?: Json | null
+          completed_at?: string | null
           created_at?: string
           final_price?: number | null
           id?: number
           payment_id?: string | null
           payment_method?: string | null
+          proof_of_completion_files?: Json | null
+          review_submitted?: boolean
           service_id?: number | null
           status?: string
           uploaded_files?: Json | null
@@ -40,11 +46,14 @@ export interface Database {
         }
         Update: {
           admin_notes?: Json | null
+          completed_at?: string | null
           created_at?: string
           final_price?: number | null
           id?: number
           payment_id?: string | null
           payment_method?: string | null
+          proof_of_completion_files?: Json | null
+          review_submitted?: boolean
           service_id?: number | null
           status?: string
           uploaded_files?: Json | null
@@ -136,6 +145,7 @@ export interface Database {
       }
       profiles: {
         Row: {
+          avatar_url: string | null
           cod_enabled: boolean
           dob: string | null
           email: string | null
@@ -146,6 +156,7 @@ export interface Database {
           updated_at: string | null
         }
         Insert: {
+          avatar_url?: string | null
           cod_enabled?: boolean
           dob?: string | null
           email?: string | null
@@ -156,6 +167,7 @@ export interface Database {
           updated_at?: string | null
         }
         Update: {
+          avatar_url?: string | null
           cod_enabled?: boolean
           dob?: string | null
           email?: string | null
@@ -176,33 +188,85 @@ export interface Database {
       }
       promo_banners: {
         Row: {
-          code: string
           created_at: string
           display_order: number
           id: number
+          image_url: string | null
           is_active: boolean
-          subtitle: string
-          title: string
+          link_url: string | null
+          mobile_image_url: string | null
         }
         Insert: {
-          code: string
           created_at?: string
           display_order?: number
           id?: number
+          image_url?: string | null
           is_active?: boolean
-          subtitle: string
-          title: string
+          link_url?: string | null
+          mobile_image_url?: string | null
         }
         Update: {
-          code?: string
           created_at?: string
           display_order?: number
           id?: number
+          image_url?: string | null
           is_active?: boolean
-          subtitle?: string
-          title?: string
+          link_url?: string | null
+          mobile_image_url?: string | null
         }
         Relationships: []
+      }
+      reviews: {
+        Row: {
+          booking_id: number
+          comment: string | null
+          created_at: string
+          id: number
+          is_approved: boolean
+          rating: number
+          service_id: number
+          user_id: string
+        }
+        Insert: {
+          booking_id: number
+          comment?: string | null
+          created_at?: string
+          id?: number
+          is_approved?: boolean
+          rating: number
+          service_id: number
+          user_id: string
+        }
+        Update: {
+          booking_id?: number
+          comment?: string | null
+          created_at?: string
+          id?: number
+          is_approved?: boolean
+          rating?: number
+          service_id?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_booking_id_fkey"
+            columns: ["booking_id"]
+            referencedRelation: "bookings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_service_id_fkey"
+            columns: ["service_id"]
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reviews_user_id_fkey"
+            columns: ["user_id"]
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       service_centers: {
         Row: {
@@ -243,7 +307,7 @@ export interface Database {
           booking_config: Json | null
           description: string | null
           display_order: number
-          icon_name: string
+          icon_url: string | null
           id: number
           is_bookable: boolean
           is_featured: boolean
@@ -255,7 +319,7 @@ export interface Database {
           booking_config?: Json | null
           description?: string | null
           display_order?: number
-          icon_name: string
+          icon_url?: string | null
           id?: number
           is_bookable?: boolean
           is_featured?: boolean
@@ -267,7 +331,7 @@ export interface Database {
           booking_config?: Json | null
           description?: string | null
           display_order?: number
-          icon_name?: string
+          icon_url?: string | null
           id?: number
           is_bookable?: boolean
           is_featured?: boolean

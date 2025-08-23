@@ -1,58 +1,51 @@
-import React, { useState, useMemo } from 'react';
-import { DocumentRequirement } from '../types';
+import React, { useState, useMemo, useContext } from 'react';
+import * as ReactRouterDOM from 'react-router-dom';
+import { DocumentRequirement, Service } from '../types';
 import { supabase } from '../supabaseClient';
 import { useAuth } from '../context/AuthContext';
+import { ServiceContext } from '../context/ServiceContext';
+import { Database, Json } from '../database.types';
 
 export type UploadedFileRecord = Record<string, { name: string; path: string; size: number }>;
 
 interface DocumentUploaderProps {
   documentRequirements: DocumentRequirement[];
-  serviceId: number;
-  onDocumentsSubmit: (files: UploadedFileRecord) => void;
+  service: Service;
+  userDetails: Record<string, any>;
 }
 
-type UploadedFilesState = Record<string, { file: File, path: string } | null>;
+type SelectedFilesState = Record<string, File | null>;
 type UploadErrorState = Record<string, string | null>;
-type UploadingState = Record<string, boolean>;
 type SubmissionState = 'idle' | 'submitting' | 'error';
 
-const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirements, serviceId, onDocumentsSubmit }) => {
+const { useNavigate } = ReactRouterDOM as any;
+
+const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirements, service, userDetails }) => {
   const { user } = useAuth();
+  const { settings } = useContext(ServiceContext);
+  const navigate = useNavigate();
   
-  const [uploadedFiles, setUploadedFiles] = useState<UploadedFilesState>(
+  const [selectedFiles, setSelectedFiles] = useState<SelectedFilesState>(
     documentRequirements.reduce((acc, doc) => ({ ...acc, [doc.id]: null }), {})
   );
-  const [uploading, setUploading] = useState<UploadingState>({});
   const [uploadError, setUploadError] = useState<UploadErrorState>({});
   const [submissionState, setSubmissionState] = useState<SubmissionState>('idle');
   const [isDragging, setIsDragging] = useState<string | null>(null);
 
-  const handleFileSelect = async (docId: string, file: File) => {
+  const handleFileSelect = (docId: string, file: File) => {
     if (!file || !user) return;
 
-    setUploading(prev => ({ ...prev, [docId]: true }));
-    setUploadError(prev => ({ ...prev, [docId]: null }));
-    
-    const fileExt = file.name.split('.').pop();
-    const fileName = `${docId}-${Date.now()}.${fileExt}`;
-    const filePath = `${user.id}/${serviceId}/${fileName}`;
-    
-    const { error } = await supabase.storage
-      .from('documents') 
-      .upload(filePath, file, {
-        cacheControl: '3600',
-        upsert: true
-      });
-
-    setUploading(prev => ({ ...prev, [docId]: false }));
-
-    if (error) {
-      console.error("Supabase upload error:", error);
-      setUploadError(prev => ({ ...prev, [docId]: 'Upload failed. Please try again.' }));
-      setUploadedFiles(prev => ({ ...prev, [docId]: null }));
-    } else {
-      setUploadedFiles(prev => ({ ...prev, [docId]: { file, path: filePath } }));
+    // File size validation
+    const maxSizeMB = settings.max_document_upload_size_mb || 5; // Default to 5MB
+    const maxSizeBytes = maxSizeMB * 1024 * 1024;
+    if (file.size > maxSizeBytes) {
+      setUploadError(prev => ({ ...prev, [docId]: `File is too large (max ${maxSizeMB}MB)` }));
+      setSelectedFiles(prev => ({ ...prev, [docId]: null }));
+      return;
     }
+
+    setUploadError(prev => ({ ...prev, [docId]: null }));
+    setSelectedFiles(prev => ({ ...prev, [docId]: file }));
   };
   
   const handleFileChange = (docId: string, e: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,49 +70,90 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirement
     }
   };
 
-  const allDocsUploaded = useMemo(() => {
-    return documentRequirements.every(doc => uploadedFiles[doc.id] !== null);
-  }, [documentRequirements, uploadedFiles]);
+  const allDocsSelected = useMemo(() => {
+    if (documentRequirements.length === 0) return true;
+    return documentRequirements.every(doc => selectedFiles[doc.id] !== null);
+  }, [documentRequirements, selectedFiles]);
   
   const handleProceed = async () => {
-    if (!allDocsUploaded) return;
+    if (!allDocsSelected || !user) return;
     setSubmissionState('submitting');
     
-    const finalFiles: UploadedFileRecord = {};
-    for (const docId in uploadedFiles) {
-        const uploaded = uploadedFiles[docId];
-        if (uploaded) {
-            finalFiles[docId] = {
-                name: uploaded.file.name,
-                path: uploaded.path,
-                size: uploaded.file.size
-            };
+    const filesToUpload: Record<string, File> = {};
+    for (const docId in selectedFiles) {
+        const file = selectedFiles[docId];
+        if (file) {
+            filesToUpload[docId] = file;
         }
     }
     
+    const finalPrice = service.price || 0;
+    const isFreeService = finalPrice === 0;
+
     try {
-        await onDocumentsSubmit(finalFiles);
-    } catch (e) {
+        if (isFreeService) {
+            // For free services, upload files and create booking immediately.
+            const finalFiles: UploadedFileRecord = {};
+            const uploadPromises = Object.entries(filesToUpload).map(async ([docId, file]) => {
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${docId}-${Date.now()}.${fileExt}`;
+                const filePath = `${user.id}/${service.id}/${fileName}`;
+                
+                const { error } = await supabase.storage.from('documents').upload(filePath, file);
+                if (error) throw new Error(`Upload failed for ${file.name}: ${error.message}`);
+                
+                finalFiles[docId] = { name: file.name, path: filePath, size: file.size };
+            });
+
+            await Promise.all(uploadPromises);
+
+            const newBookingPayload: Database['public']['Tables']['bookings']['Insert'] = {
+                user_id: user.id,
+                service_id: service.id,
+                status: 'Pending',
+                user_details: userDetails as unknown as Json,
+                uploaded_files: finalFiles as unknown as Json,
+                payment_method: 'N/A (Free)',
+                final_price: 0,
+            };
+            const { data, error } = await supabase.from('bookings').insert(newBookingPayload).select().single();
+            if (error) throw error;
+            const bookingId = (data as any).id;
+            navigate('/booking-confirmed', { state: { serviceName: service.name, bookingId, price: finalPrice } });
+        } else {
+            // For paid services, pass File objects to the payment page to be uploaded after payment.
+            navigate('/payment', { 
+                state: { 
+                    serviceId: service.id,
+                    serviceName: service.name, 
+                    price: finalPrice,
+                    userDetails: userDetails,
+                    filesToUpload: filesToUpload,
+                }
+            });
+        }
+    } catch (err) {
+        console.error("Failed to submit booking:", err);
         setSubmissionState('error');
     }
   }
+  
+  const buttonLabel = (service.price || 0) === 0 ? 'Complete Booking' : 'Proceed to Payment';
 
   return (
     <div className="mt-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {documentRequirements.map(doc => {
-          const uploaded = uploadedFiles[doc.id];
-          const file = uploaded?.file;
-          const isUploading = uploading[doc.id];
+          const file = selectedFiles[doc.id];
           const error = uploadError[doc.id];
-          const isUploaded = !!file && !isUploading && !error;
+          const isSelected = !!file && !error;
 
           return (
             <div key={doc.id} className="bg-slate-50 dark:bg-slate-800 p-5 rounded-2xl border border-slate-200/80 dark:border-slate-700/50">
                 <h4 className="font-bold text-slate-800 dark:text-slate-200">{doc.name}</h4>
                 <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">{doc.description}</p>
                 
-                {isUploaded ? (
+                {isSelected && file ? (
                     <div className="bg-white dark:bg-slate-700 p-4 rounded-xl border border-emerald-300 dark:border-emerald-500/50">
                         <div className="flex items-center gap-3">
                            <div className="flex-shrink-0 h-10 w-10 flex items-center justify-center bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
@@ -142,12 +176,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirement
                         onDrop={(e) => onDrop(e, doc.id)}
                         className={`flex flex-col items-center justify-center w-full h-32 px-4 transition-colors duration-300 border-2 border-dashed rounded-xl cursor-pointer ${isDragging === doc.id ? 'border-cyan-500 bg-cyan-50 dark:bg-cyan-900/30' : error ? 'border-red-400 bg-red-50 dark:bg-red-900/30' : 'border-slate-300 dark:border-slate-600 hover:border-cyan-400 bg-white dark:bg-slate-700/50'}`}
                     >
-                        {isUploading ? (
-                            <div className="flex flex-col items-center">
-                                <svg className="animate-spin h-8 w-8 text-cyan-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
-                                <span className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400">Uploading...</span>
-                            </div>
-                        ) : error ? (
+                        {error ? (
                             <div className="flex flex-col items-center text-center">
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
                                 <span className="mt-2 text-sm font-medium text-red-600">{error}</span>
@@ -158,7 +187,7 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirement
                                 <span className="mt-2 text-sm font-medium text-slate-500 dark:text-slate-400 text-center">Drag & Drop or <span className="text-cyan-600 dark:text-cyan-400 font-semibold">click to upload</span></span>
                             </div>
                         )}
-                        <input type="file" className="hidden" onChange={(e) => handleFileChange(doc.id, e)} disabled={isUploading} />
+                        <input type="file" className="hidden" onChange={(e) => handleFileChange(doc.id, e)} />
                     </label>
                 )}
             </div>
@@ -169,10 +198,10 @@ const DocumentUploader: React.FC<DocumentUploaderProps> = ({ documentRequirement
       <div className="pt-10 text-center">
         <button
           onClick={handleProceed}
-          disabled={!allDocsUploaded || submissionState === 'submitting'}
+          disabled={!allDocsSelected || submissionState === 'submitting'}
           className="w-full sm:w-auto px-16 py-4 text-base font-bold text-white bg-cyan-500 rounded-xl shadow-lg hover:shadow-xl hover:bg-cyan-600 disabled:bg-slate-300 disabled:text-slate-500 disabled:cursor-not-allowed disabled:shadow-none focus:outline-none focus:ring-4 focus:ring-cyan-300 transition-all duration-300 ease-in-out transform hover:-translate-y-1 disabled:transform-none"
         >
-          {submissionState === 'submitting' ? 'Submitting...' : 'Complete Booking'}
+          {submissionState === 'submitting' ? 'Submitting...' : buttonLabel}
         </button>
         {submissionState === 'error' && (
             <p className="text-red-600 mt-4">Failed to submit booking. Please try again.</p>

@@ -1,5 +1,8 @@
-import React, { useEffect, useRef } from 'react';
+
+import React, { useEffect, useRef, useState } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
+import { supabase } from '../supabaseClient';
+import { Review } from '../types';
 
 const { Link } = ReactRouterDOM as any;
 
@@ -51,8 +54,77 @@ const SecurityIcon = () => <svg xmlns="http://www.w3.org/2000/svg" fill="none" v
 
 const ownerImageUrl = "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1";
 
+const TestimonialSkeleton = () => (
+    <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col animate-pulse">
+        <div className="h-5 w-28 bg-slate-200 dark:bg-slate-700 rounded"></div>
+        <div className="mt-4 space-y-2 flex-grow">
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-full"></div>
+            <div className="h-4 bg-slate-200 dark:bg-slate-700 rounded w-5/6"></div>
+        </div>
+        <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-4">
+            <div className="w-14 h-14 rounded-full bg-slate-200 dark:bg-slate-700"></div>
+            <div>
+                <div className="h-5 w-32 bg-slate-200 dark:bg-slate-700 rounded"></div>
+                <div className="h-3 w-24 bg-slate-200 dark:bg-slate-700 rounded mt-2"></div>
+            </div>
+        </div>
+    </div>
+);
+
+const TestimonialCard: React.FC<{ review: Review }> = ({ review }) => {
+    const { profiles: user, services: service, rating, comment } = review;
+    
+    return (
+        <div className="bg-white dark:bg-slate-800 p-6 md:p-8 rounded-2xl shadow-xl border border-slate-200/50 dark:border-slate-700/50 flex flex-col transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 relative overflow-hidden h-full">
+            <svg className="absolute top-6 right-6 w-20 h-20 text-slate-100 dark:text-slate-700/50" fill="currentColor" viewBox="0 0 32 32"><path d="M9.33,26.33a2.67,2.67,0,0,1-2.66-2.67V12a2.67,2.67,0,0,1,2.67-2.67H14.67a2.67,2.67,0,0,1,2.66,2.67v8.89a.89.89,0,0,1-.89.89H12a2.67,2.67,0,0,0-2.67,2.67Z"/><path d="M22.67,26.33a2.67,2.67,0,0,1-2.67-2.67V12a2.67,2.67,0,0,1,2.67-2.67H28a2.67,2.67,0,0,1,2.67,2.67v8.89a.89.89,0,0,1-.89.89H25.33a2.67,2.67,0,0,0-2.67,2.67Z"/></svg>
+            <div className="relative z-10 flex flex-col h-full">
+                <div className="flex items-center gap-1 text-yellow-400">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                        <svg key={i} xmlns="http://www.w3.org/2000/svg" className={`h-5 w-5 ${i < rating ? 'text-yellow-400' : 'text-slate-300'}`} viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                    ))}
+                </div>
+                <p className="mt-4 text-slate-600 dark:text-slate-300 flex-grow text-lg leading-relaxed">
+                    "{comment}"
+                </p>
+                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-4">
+                    <img className="w-14 h-14 rounded-full object-cover" src={user?.avatar_url || `https://ui-avatars.com/api/?name=${user?.full_name}&background=random`} alt={user?.full_name || 'User'} />
+                    <div>
+                        <p className="font-bold text-slate-800 dark:text-slate-100 text-lg">{user?.full_name}</p>
+                        <p className="text-sm text-slate-500 dark:text-slate-400">Used for: {service?.name}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 const AboutPage: React.FC = () => {
+    const [reviews, setReviews] = useState<Review[]>([]);
+    const [reviewsLoading, setReviewsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchReviews = async () => {
+            setReviewsLoading(true);
+            try {
+                const { data, error } = await supabase
+                    .from('reviews')
+                    .select('*, profiles(full_name, avatar_url), services(name)')
+                    .eq('is_approved', true)
+                    .order('created_at', { ascending: false })
+                    .limit(2);
+                
+                if (error) throw error;
+                setReviews(data as any[]);
+            } catch (error) {
+                console.error("Error fetching reviews for about page:", error);
+            } finally {
+                setReviewsLoading(false);
+            }
+        };
+        fetchReviews();
+    }, []);
 
     return (
         <div className="space-y-24 md:space-y-40 overflow-hidden">
@@ -186,34 +258,30 @@ const AboutPage: React.FC = () => {
             </section>
 
              {/* --- Testimonials Section --- */}
-            <section className="max-w-7xl mx-auto px-4">
-                <Animated className="text-center">
-                    <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">What Our Users Say</h2>
-                    <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
-                        We're proud to have made a difference in the lives of citizens across the country.
-                    </p>
-                </Animated>
-                <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {[
-                        { img: "https://images.pexels.com/photos/3772510/pexels-photo-3772510.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", name: "Anjali Gupta", service: "Passport Renewal", quote: "I renewed my passport entirely from home! I never thought it could be this simple. The process was clear, the document upload was a breeze, and I was kept informed at every step. Absolutely fantastic service." },
-                        { img: "https://images.pexels.com/photos/2379004/pexels-photo-2379004.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=1", name: "Sameer Khan", service: "Driving License", quote: "Getting my driver's license used to be a nightmare. Documentmitra turned it into a straightforward digital process. I saved so much time and avoided all the usual bureaucratic headaches. Highly recommended!" },
-                    ].map((testimonial, i) => (
-                        <Animated key={testimonial.name} delay={i * 100}>
-                            <div className="h-full bg-white dark:bg-slate-800 p-8 rounded-2xl shadow-lg border border-slate-200/50 dark:border-slate-700/50 flex flex-col">
-                                <svg className="w-12 h-12 text-cyan-300 dark:text-cyan-600" fill="currentColor" viewBox="0 0 32 32"><path d="M9.33,26.33a2.67,2.67,0,0,1-2.66-2.67V12a2.67,2.67,0,0,1,2.67-2.67H14.67a2.67,2.67,0,0,1,2.66,2.67v8.89a.89.89,0,0,1-.89.89H12a2.67,2.67,0,0,0-2.67,2.67Z"/><path d="M22.67,26.33a2.67,2.67,0,0,1-2.67-2.67V12a2.67,2.67,0,0,1,2.67-2.67H28a2.67,2.67,0,0,1,2.67,2.67v8.89a.89.89,0,0,1-.89.89H25.33a2.67,2.67,0,0,0-2.67,2.67Z"/></svg>
-                                <p className="mt-4 text-lg text-slate-600 dark:text-slate-300 flex-grow">"{testimonial.quote}"</p>
-                                <div className="mt-6 pt-6 border-t border-slate-200 dark:border-slate-700 flex items-center gap-4">
-                                    <img src={testimonial.img} alt={testimonial.name} className="w-14 h-14 rounded-full object-cover"/>
-                                    <div>
-                                        <p className="font-bold text-slate-800 dark:text-slate-100">{testimonial.name}</p>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400">Used for: {testimonial.service}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </Animated>
-                    ))}
-                </div>
-            </section>
+            {(!reviewsLoading && reviews.length > 0) && (
+                <section className="max-w-7xl mx-auto px-4">
+                    <Animated className="text-center">
+                        <h2 className="text-3xl md:text-4xl font-extrabold text-slate-800 dark:text-slate-200 tracking-tight">What Our Users Say</h2>
+                        <p className="mt-4 text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+                            We're proud to have made a difference in the lives of citizens across the country.
+                        </p>
+                    </Animated>
+                     <div className="mt-12 grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        {reviewsLoading ? (
+                            <>
+                                <Animated delay={0}><TestimonialSkeleton /></Animated>
+                                <Animated delay={100}><TestimonialSkeleton /></Animated>
+                            </>
+                        ) : (
+                            reviews.map((review, i) => (
+                                <Animated key={review.id} delay={i * 100}>
+                                    <TestimonialCard review={review} />
+                                </Animated>
+                            ))
+                        )}
+                    </div>
+                </section>
+            )}
             
             {/* Final CTA */}
             <section className="relative max-w-5xl mx-auto px-4 py-16 text-center">

@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 import { supabase } from '../supabaseClient';
 import { Notification } from '../types';
 import { Database } from '../database.types';
+import { ServiceContext } from '../context/ServiceContext';
 
 
 const { Link, useNavigate } = ReactRouterDOM as any;
@@ -49,7 +50,8 @@ const NotificationPanel: React.FC<{
 
 
 const Header: React.FC = () => {
-  const { user, isAdmin, loading, notifications, fetchNotifications } = useAuth();
+  const { user, profile, isAdmin, loading, notifications, fetchNotifications } = useAuth();
+  const { settings } = useContext(ServiceContext);
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const [isNotificationOpen, setNotificationOpen] = useState(false);
@@ -101,9 +103,12 @@ const Header: React.FC = () => {
   return (
     <header className="bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-30 border-b border-slate-200/80 dark:border-slate-800/80">
       <div className="max-w-7xl mx-auto flex justify-between items-center p-4">
-        <Link to="/" className="flex flex-col sm:flex-row sm:items-baseline sm:gap-2">
-           <span className="font-bold text-xl sm:text-2xl text-slate-800 dark:text-slate-200 leading-none">Document</span>
-           <span className="font-bold text-xl sm:text-2xl text-cyan-500 leading-none">mitra.</span>
+        <Link to="/" className="flex items-center gap-3">
+          {settings.logo_url ? (
+            <img src={settings.logo_url} alt={`${settings.website_name} logo`} className="h-8 sm:h-9 w-auto" />
+          ) : (
+             <span className="font-bold text-2xl text-slate-800 dark:text-slate-200">{settings.website_name}</span>
+          )}
         </Link>
         <div className="flex items-center gap-2 sm:gap-4">
           <button
@@ -112,7 +117,7 @@ const Header: React.FC = () => {
             aria-label="Toggle theme"
           >
             <div className="relative w-6 h-6">
-              <svg xmlns="http://www.w3.org/2000/svg" className={`absolute inset-0 w-6 h-6 text-yellow-500 transition-all duration-300 transform ${theme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <svg xmlns="http://www.w.org/2000/svg" className={`absolute inset-0 w-6 h-6 text-yellow-500 transition-all duration-300 transform ${theme === 'light' ? 'rotate-0 scale-100 opacity-100' : 'rotate-90 scale-0 opacity-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
               </svg>
               <svg xmlns="http://www.w3.org/2000/svg" className={`absolute inset-0 w-6 h-6 text-cyan-400 transition-all duration-300 transform ${theme === 'dark' ? 'rotate-0 scale-100 opacity-100' : '-rotate-90 scale-0 opacity-0'}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -147,8 +152,12 @@ const Header: React.FC = () => {
                     {isNotificationOpen && <NotificationPanel notifications={notifications} onClose={() => setNotificationOpen(false)} onMarkAsRead={handleMarkAsRead} />}
                 </div>
 
-              <Link to="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-500 text-white hover:bg-cyan-600 transition-transform transform hover:scale-110" aria-label="View Profile">
-                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+              <Link to="/profile" className="flex items-center justify-center w-10 h-10 rounded-full bg-cyan-500 text-white hover:bg-cyan-600 transition-transform transform hover:scale-110 overflow-hidden" aria-label="View Profile">
+                {profile?.avatar_url ? (
+                    <img src={profile.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" /></svg>
+                )}
               </Link>
             </>
           ) : (

@@ -1,8 +1,9 @@
 
-import React, { createContext, useContext, useEffect, useState, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useCallback, useRef } from 'react';
 import type { User } from '@supabase/supabase-js';
 import { supabase } from '../supabaseClient';
 import { Profile, Notification } from '../types';
+import { ServiceContext } from './ServiceContext';
 
 interface AuthContextType {
   user: User | null;
@@ -25,6 +26,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [loading, setLoading] = useState(true);
   const [profileLoading, setProfileLoading] = useState(true);
   const [notificationsLoading, setNotificationsLoading] = useState(true);
+  const { settings } = useContext(ServiceContext);
+  const prevUnreadCount = useRef(0);
 
   const fetchProfile = useCallback(async (sessionUser: User) => {
     setProfileLoading(true);
@@ -81,10 +84,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(true);
     const getInitialSession = async () => {
         const { data: { session } } = await supabase.auth.getSession();
-        setUser(session?.user ?? null);
+        const sessionUser = session?.user ?? null;
+        setUser(sessionUser);
+        
+        if (sessionUser) {
+            const initialUnread = (await supabase.from('notifications').select('id', { count: 'exact', head: true }).eq('user_id', sessionUser.id).eq('is_read', false)).count;
+            prevUnreadCount.current = initialUnread || 0;
+        } else {
+             prevUnreadCount.current = 0;
+        }
         
         // Initial loading state is determined by fetches that run when user is set
-        if (!session?.user) {
+        if (!sessionUser) {
             setProfileLoading(false);
             setNotificationsLoading(false);
         }
@@ -97,6 +108,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (!session?.user) {
           setProfileLoading(false);
           setNotificationsLoading(false);
+          prevUnreadCount.current = 0;
       }
     });
 
@@ -116,6 +128,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setNotifications([]);
     }
   }, [user, fetchProfile, fetchNotifications]);
+  
+  // New effect to watch for new notifications and play sound
+  useEffect(() => {
+    if (!user || loading) return; // Don't run on initial load or if logged out
+
+    const unreadCount = notifications.filter(n => !n.is_read).length;
+
+    // Check if new unread notifications have arrived
+    if (unreadCount > prevUnreadCount.current) {
+        const soundUrl = settings.user_notification_sound;
+        if (soundUrl) {
+            const audio = new Audio(soundUrl);
+            audio.play().catch(e => console.error("User notification audio play failed:", e));
+        }
+    }
+
+    // Update the ref with the current count for the next comparison
+    prevUnreadCount.current = unreadCount;
+
+  }, [notifications, user, loading, settings.user_notification_sound]);
+
 
   // Effect for managing combined loading state
   useEffect(() => {

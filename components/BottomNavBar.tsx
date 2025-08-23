@@ -1,17 +1,31 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import { ServiceContext } from '../context/ServiceContext';
 
 const { NavLink, Link, useLocation } = ReactRouterDOM as any;
 
+// --- Social Icons ---
+const FacebookIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9 8h-3v4h3v12h5v-12h3.642l.358-4h-4v-1.667c0-.955.192-1.333 1.115-1.333h2.885v-5h-3.808c-3.596 0-5.192 1.583-5.192 4.615v3.385z" /></svg>
+const TwitterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616v.064c0 2.298 1.634 4.212 3.794 4.649-.65.177-1.353.23-2.064.083.616 1.916 2.408 3.287 4.528 3.325-1.782 1.48-4.022 2.29-6.393 2.185.002.002.004.004.006.004 2.2 1.46 4.838 2.308 7.646 2.308 9.177 0 14.209-7.828 13.618-14.735.973-.705 1.825-1.582 2.5-2.583z" /></svg>;
+const LinkedInIcon = () => <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24"><path d="M4.98 3.5c0 1.381-1.11 2.5-2.48 2.5s-2.48-1.119-2.48-2.5c0-1.38 1.11-2.5 2.48-2.5s2.48 1.12 2.48 2.5zm.02 4.5h-5v16h5v-16zm7.982 0h-4.968v16h4.969v-8.399c0-4.67 6.029-4.481 6.029 0v8.399h4.988v-10.131c0-7.88-8.922-7.593-11.018-3.714v-2.155z" /></svg>;
+
+
 const MenuPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen, onClose }) => {
+    const { settings } = useContext(ServiceContext);
     const menuLinks = [
         { name: 'About Us', href: '/about' },
         { name: 'Contact Us', href: '/contact' },
         { name: 'Terms & Conditions', href: '/terms' },
     ];
     
+    const socialLinks = [
+      { name: 'Facebook', href: settings.social_facebook, icon: FacebookIcon },
+      { name: 'Twitter', href: settings.social_twitter, icon: TwitterIcon },
+      { name: 'LinkedIn', href: settings.social_linkedin, icon: LinkedInIcon },
+    ].filter(link => link.href);
+
     return (
         <div className={`fixed inset-0 z-50 transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
             <div className="absolute inset-0 bg-black/60" onClick={onClose}></div>
@@ -30,6 +44,25 @@ const MenuPanel: React.FC<{ isOpen: boolean; onClose: () => void }> = ({ isOpen,
                         </Link>
                     ))}
                 </nav>
+                 {socialLinks.length > 0 && (
+                    <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-700">
+                        <p className="px-2 mb-2 text-sm font-semibold text-slate-500 dark:text-slate-400">Follow Us</p>
+                        <div className="flex items-center justify-around px-2">
+                            {socialLinks.map(link => (
+                                <a 
+                                  key={link.name} 
+                                  href={link.href} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="p-3 text-slate-500 dark:text-slate-400 hover:text-cyan-500 dark:hover:text-cyan-400 transition-colors" 
+                                  aria-label={`Visit our ${link.name} page`}
+                                >
+                                    <link.icon />
+                                </a>
+                            ))}
+                        </div>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -1,13 +1,23 @@
 
+
+
+
+
+
+
+
+
+
 import React from 'react';
 import * as ReactRouterDOM from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import HomePage from './HomePage';
-import ServicePage from './ServicePage';
+import ServicePage from './pages/ServicePage';
 import BookingPage from './BookingPage';
 import PaymentPage from './PaymentPage';
 import PaymentSuccessPage from './pages/PaymentSuccessPage';
+import PaymentFailedPage from './pages/PaymentFailedPage';
 import LoginPage from './LoginPage';
 import RegisterPage from './RegisterPage';
 import { AuthProvider } from './context/AuthContext';
@@ -21,6 +31,7 @@ import SearchResultsPage from './pages/SearchResultsPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import TermsPage from './pages/TermsPage';
+import HelmetManager from './components/HelmetManager';
 
 
 // Admin components
@@ -34,6 +45,11 @@ import AdminPromoBannerPage from './pages/admin/AdminPromoBannerPage';
 import AdminNotificationsPage from './pages/admin/AdminNotificationsPage';
 import AdminUsersPage from './pages/admin/AdminUsersPage';
 import AdminPaymentGatewaysPage from './pages/admin/AdminPaymentGatewaysPage';
+import AdminReviewsPage from './pages/admin/AdminReviewsPage';
+import AdminIncomePage from './pages/admin/AdminIncomePage';
+import AdminTransactionsPage from './pages/admin/AdminTransactionsPage';
+import AdminAudioSettingsPage from './pages/admin/AdminAudioSettingsPage';
+import AdminMessagesPage from './pages/admin/AdminMessagesPage';
 
 const { HashRouter, Routes, Route, Outlet } = ReactRouterDOM as any;
 
@@ -55,6 +71,7 @@ function App() {
     <ThemeProvider>
       <AuthProvider>
         <ServiceProvider>
+          <HelmetManager />
           <HashRouter>
             <Routes>
               {/* Public Routes with standard layout */}
@@ -80,6 +97,10 @@ function App() {
                     path="/booking-confirmed" 
                     element={<ProtectedRoute><PaymentSuccessPage /></ProtectedRoute>} 
                   />
+                   <Route 
+                    path="/payment-failed" 
+                    element={<ProtectedRoute><PaymentFailedPage /></ProtectedRoute>} 
+                  />
                   <Route 
                     path="/profile" 
                     element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} 
@@ -96,12 +117,17 @@ function App() {
                 }
               >
                 <Route index element={<AdminDashboardPage />} />
+                <Route path="income" element={<AdminIncomePage />} />
+                <Route path="transactions" element={<AdminTransactionsPage />} />
                 <Route path="services" element={<AdminServicesPage />} />
                 <Route path="promo-banner" element={<AdminPromoBannerPage />} />
                 <Route path="bookings" element={<AdminBookingsPage />} />
+                <Route path="messages" element={<AdminMessagesPage />} />
                 <Route path="users" element={<AdminUsersPage />} />
+                <Route path="reviews" element={<AdminReviewsPage />} />
                 <Route path="notifications" element={<AdminNotificationsPage />} />
                 <Route path="payment-gateways" element={<AdminPaymentGatewaysPage />} />
+                <Route path="audio-settings" element={<AdminAudioSettingsPage />} />
                 <Route path="settings" element={<AdminSettingsPage />} />
               </Route>
             </Routes>

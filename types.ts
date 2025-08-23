@@ -30,7 +30,7 @@ export interface Service {
   id: number;
   name: string;
   description?: string | null;
-  icon_name: string;
+  icon_url: string | null;
   parent_id?: number | null;
   // New fields for admin control
   is_featured: boolean;
@@ -50,6 +50,7 @@ export interface Profile {
     dob?: string | null;
     mobile_number?: string | null;
     cod_enabled: boolean; // For payment gateway control
+    avatar_url?: string | null;
     updated_at?: string | null;
 }
 
@@ -64,6 +65,13 @@ export interface AdminNote {
     timestamp: string;
     admin_name: string; // To track which admin wrote the note
 }
+
+// Type for files uploaded by admin as proof of completion
+export type ProofFile = {
+    name: string;
+    path: string;
+    size: number;
+};
 
 export interface Booking {
     id: number;
@@ -80,12 +88,46 @@ export interface Booking {
     payment_method: string | null;
     payment_id: string | null;
     final_price: number | null;
+    proof_of_completion_files: ProofFile[] | null; // New field for admin uploads
+    review_submitted: boolean;
+    completed_at?: string | null;
 }
+
+// --- New Review Type ---
+export interface Review {
+  id: number;
+  booking_id: number;
+  user_id: string;
+  service_id: number;
+  rating: number;
+  comment?: string | null;
+  is_approved: boolean;
+  created_at: string;
+  // Joined data
+  profiles?: { full_name: string | null; avatar_url?: string | null; } | null;
+  services?: { name: string | null } | null;
+}
+
 
 // --- Global App Settings Type ---
 
 export interface AppSettings {
     homepage_service_limit: number;
+    website_name: string;
+    website_description: string;
+    logo_url: string;
+    favicon_url: string;
+    favicon_text: string;
+    contact_address: string;
+    contact_email: string;
+    contact_phone: string;
+    social_facebook: string;
+    social_twitter: string;
+    social_linkedin: string;
+    max_document_upload_size_mb: number;
+    document_retention_days: number;
+    admin_booking_notification_sound?: string | null;
+    user_notification_sound?: string | null;
     twilio_config?: {
         account_sid: string;
         auth_token: string;
@@ -96,9 +138,9 @@ export interface AppSettings {
 // --- Promo Banner Type ---
 export interface PromoBannerSlide {
   id: number;
-  title: string;
-  subtitle: string;
-  code: string;
+  image_url?: string | null; // Desktop image
+  mobile_image_url?: string | null; // Mobile image
+  link_url?: string | null;
   is_active: boolean;
   display_order: number;
 }
